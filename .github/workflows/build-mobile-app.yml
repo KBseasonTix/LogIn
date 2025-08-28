@@ -1,0 +1,137 @@
+name: Build Mobile App
+
+on:
+  push:
+    branches: [ main, release/* ]
+    paths: 
+      - 'client/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'client/**'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - ios
+        - android
+      profile:
+        description: 'Build profile'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+        - preview
+        - production
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [android, ios]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+      
+      - name: Setup Expo CLI
+        run: npm install -g @expo/cli eas-cli
+      
+      - name: Install dependencies
+        working-directory: ./client
+        run: npm ci
+      
+      - name: Verify Expo configuration
+        working-directory: ./client
+        run: npx expo config --type public
+      
+      - name: Run security audit
+        working-directory: ./client
+        run: npm audit --audit-level high || true
+      
+      # Skip platform-specific builds in PR
+      - name: Build for Android (Preview)
+        if: matrix.platform == 'android' && github.event_name != 'pull_request'
+        working-directory: ./client
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          profile=${{ github.event.inputs.profile || 'preview' }}
+          eas build --platform android --profile $profile --non-interactive
+      
+      - name: Build for iOS (Preview)
+        if: matrix.platform == 'ios' && github.event_name != 'pull_request'
+        working-directory: ./client
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          profile=${{ github.event.inputs.profile || 'preview' }}
+          eas build --platform ios --profile $profile --non-interactive
+
+  # Production builds only on main branch with manual trigger
+  production-build:
+    if: github.ref == 'refs/heads/main' && github.event.inputs.profile == 'production'
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+      
+      - name: Setup Expo CLI
+        run: npm install -g @expo/cli eas-cli
+      
+      - name: Install dependencies
+        working-directory: ./client
+        run: npm ci
+      
+      - name: Build for production
+        working-directory: ./client
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          platform=${{ github.event.inputs.platform || 'all' }}
+          if [ "$platform" = "all" ]; then
+            eas build --platform all --profile production --non-interactive
+          else
+            eas build --platform $platform --profile production --non-interactive
+          fi
+      
+      - name: Auto-submit to stores
+        if: github.event.inputs.profile == 'production'
+        working-directory: ./client
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          # Only submit if we have the necessary credentials configured
+          if eas submit --platform ios --profile production --non-interactive 2>/dev/null; then
+            echo "iOS submission successful"
+          else
+            echo "iOS submission skipped - configure credentials in EAS"
+          fi
+          
+          if eas submit --platform android --profile production --non-interactive 2>/dev/null; then
+            echo "Android submission successful"  
+          else
+            echo "Android submission skipped - configure credentials in EAS"
+          fi
