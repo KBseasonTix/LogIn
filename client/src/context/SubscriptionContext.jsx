@@ -309,6 +309,47 @@ export const SubscriptionProvider = ({ children }) => {
     }
   };
 
+  const upgradeSubscription = async (stripePriceId, planType) => {
+    try {
+      setLoading(true);
+      
+      // This would integrate with Stripe API 
+      // For demo purposes, we'll simulate success
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const newSubscriptionData = {
+        stripeCustomerId: 'cus_demo123',
+        subscriptionId: 'sub_demo123',
+        currentPeriodEnd: new Date(Date.now() + (planType === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
+        cancelAtPeriodEnd: false,
+        planType: planType,
+        stripePriceId: stripePriceId
+      };
+
+      // End trial if active
+      if (trialStatus.isInTrial) {
+        const newTrialStatus = { ...trialStatus, isInTrial: false };
+        setTrialStatus(newTrialStatus);
+        await AsyncStorage.setItem('trial_status', JSON.stringify(newTrialStatus));
+      }
+
+      setSubscriptionTier(SUBSCRIPTION_TIERS.PREMIUM);
+      setSubscriptionData(newSubscriptionData);
+
+      await Promise.all([
+        AsyncStorage.setItem('subscription_tier', SUBSCRIPTION_TIERS.PREMIUM),
+        AsyncStorage.setItem('subscription_data', JSON.stringify(newSubscriptionData))
+      ]);
+
+      return { success: true };
+    } catch (error) {
+      console.error('Subscription upgrade failed:', error);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const subscribeToPremium = async (paymentMethodId) => {
     try {
       setLoading(true);
@@ -442,6 +483,7 @@ export const SubscriptionProvider = ({ children }) => {
     // Subscription management
     startTrial,
     subscribeToPremium,
+    upgradeSubscription,
     cancelSubscription,
     
     // Utilities

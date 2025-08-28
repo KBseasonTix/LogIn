@@ -5,14 +5,19 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, G, Text as SvgText } from 'react-native-svg';
 import { useAuth } from '../context/AuthContext';
+import { useSubscription } from '../context/SubscriptionContext';
 import { Card, Button, Avatar } from '../components';
 import BadgeGiftingModal from '../components/BadgeGiftingModal';
+import RewardedAdButton from '../components/RewardedAdButton';
+import SubscriptionModal from '../components/SubscriptionModal';
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from '../utils/designSystem';
 
 const ProfileScreen = ({ navigation }) => {
   const { user, updateGoalProgress, updateStreak } = useAuth();
+  const { subscriptionTier, SUBSCRIPTION_TIERS } = useSubscription();
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [showBadgeGifting, setShowBadgeGifting] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   
   if (!user) {
     return (
@@ -240,6 +245,34 @@ const ProfileScreen = ({ navigation }) => {
         />
       </View>
       
+      {/* Points & Rewards Section */}
+      {subscriptionTier !== SUBSCRIPTION_TIERS.PREMIUM && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Earn Points</Text>
+            <TouchableOpacity 
+              style={styles.upgradeButton}
+              onPress={() => setShowSubscriptionModal(true)}
+            >
+              <Text style={styles.upgradeButtonText}>Upgrade</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <Card style={styles.rewardsCard}>
+            <Text style={styles.rewardsTitle}>Watch ads to earn points!</Text>
+            <Text style={styles.rewardsSubtitle}>
+              Use points to gift badges to other users
+            </Text>
+            
+            <RewardedAdButton 
+              onRewardEarned={(points) => {
+                console.log(`Earned ${points} points!`);
+              }}
+            />
+          </Card>
+        </View>
+      )}
+      
       {/* Streak Section */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
@@ -443,6 +476,12 @@ const ProfileScreen = ({ navigation }) => {
         visible={showBadgeGifting}
         targetUser={{ username: 'friend' }} // This would be passed from another screen
         onClose={() => setShowBadgeGifting(false)}
+      />
+      
+      {/* Subscription Modal */}
+      <SubscriptionModal
+        visible={showSubscriptionModal}
+        onClose={() => setShowSubscriptionModal(false)}
       />
     </ScrollView>
   );
@@ -912,6 +951,34 @@ const styles = StyleSheet.create({
     ...Typography.styles.caption,
     color: Colors.text.secondary,
     textAlign: 'center',
+  },
+  // Rewards section styles
+  rewardsCard: {
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+  rewardsTitle: {
+    ...Typography.styles.h3,
+    color: Colors.text.primary,
+    marginBottom: Spacing.sm,
+    textAlign: 'center',
+  },
+  rewardsSubtitle: {
+    ...Typography.styles.body,
+    color: Colors.text.secondary,
+    marginBottom: Spacing.lg,
+    textAlign: 'center',
+  },
+  upgradeButton: {
+    backgroundColor: Colors.primary[600],
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.medium,
+  },
+  upgradeButtonText: {
+    ...Typography.styles.bodySmall,
+    color: Colors.text.inverse,
+    fontWeight: Typography.fontWeight.bold,
   },
 });
 

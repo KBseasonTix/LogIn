@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
           points: 1250,
           subscriptionStatus: 'free',
           joinedCommunities: ['1', '2'],
+          dailyAds: {}, // Track daily ad views
           currentStreak: 12,
           longestStreak: 28,
           totalPosts: 45,
@@ -540,6 +541,63 @@ export const AuthProvider = ({ children }) => {
         
         return { ...prev, achievements };
       });
+    },
+
+    // Points and ads management
+    updateUserPoints: async (pointsToAdd) => {
+      const today = new Date().toDateString();
+      
+      setUser(prev => {
+        // Update daily ad count
+        const dailyAds = { ...prev.dailyAds };
+        if (pointsToAdd > 0 && pointsToAdd === 100) { // Assumes 100 points = rewarded ad
+          dailyAds[today] = (dailyAds[today] || 0) + 1;
+        }
+
+        return {
+          ...prev,
+          points: prev.points + pointsToAdd,
+          dailyAds
+        };
+      });
+      
+      return { success: true };
+    },
+
+    spendPoints: (pointsToSpend, reason = 'purchase') => {
+      setUser(prev => {
+        if (prev.points < pointsToSpend) {
+          return prev; // Not enough points
+        }
+        
+        return {
+          ...prev,
+          points: prev.points - pointsToSpend
+        };
+      });
+      
+      return { success: true };
+    },
+
+    giftBadge: (recipientUserId, badgeType, message = '', pointsCost = 50) => {
+      if (user.points < pointsCost) {
+        return { success: false, error: 'Not enough points' };
+      }
+
+      // Spend points
+      setUser(prev => ({
+        ...prev,
+        points: prev.points - pointsCost
+      }));
+
+      // In a real app, this would make an API call
+      Alert.alert(
+        '🎁 Badge Gifted!',
+        `You've gifted a ${badgeType} badge! The recipient will be notified.`,
+        [{ text: 'Great!' }]
+      );
+
+      return { success: true };
     }
   };
   
