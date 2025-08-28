@@ -1,0 +1,30 @@
+{
+  "name": "login-app",
+  "version": "1.0.0",
+  "description": "LogIn Productivity Community App - Root Package",
+  "private": true,
+  "scripts": {
+    "start": "cd server && npm start",
+    "dev": "cd server && npm run dev",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd server && npm install --production"
+  },
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "keywords": [
+    "productivity",
+    "community",
+    "fitness",
+    "goals",
+    "react-native",
+    "nodejs"
+  ],
+  "author": "Kyle",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
