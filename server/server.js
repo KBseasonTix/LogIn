@@ -6,28 +6,50 @@ const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 
 // Load environment variables
-if (process.env.NODE_ENV === 'production') {
+if (process.env.RAILWAY_ENVIRONMENT) {
+  // Railway automatically injects environment variables
+  console.log('Running on Railway - using injected environment variables');
+} else if (process.env.NODE_ENV === 'production') {
   dotenv.config({ path: '.env.production' });
 } else {
   dotenv.config();
 }
 
+// Debug environment variables
+console.log('Environment check:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('RAILWAY_ENVIRONMENT:', process.env.RAILWAY_ENVIRONMENT);
+console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'SET' : 'UNDEFINED');
+console.log('PORT:', process.env.PORT);
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
 // MongoDB Connection
+if (!process.env.MONGODB_URI) {
+  console.error('❌ MONGODB_URI environment variable is not set!');
+  console.error('Please set MONGODB_URI in Railway dashboard environment variables.');
+  process.exit(1);
+}
+
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.log(err));
+.then(() => {
+  console.log('✅ MongoDB connected successfully');
+  console.log('Database:', process.env.MONGODB_URI.split('/')[3]?.split('?')[0]);
+})
+.catch(err => {
+  console.error('❌ MongoDB connection failed:', err.message);
+  process.exit(1);
+});
 
 // Models
 const User = require('./models/User');
