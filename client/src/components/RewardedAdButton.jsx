@@ -7,7 +7,7 @@ import {
   Alert,
   ActivityIndicator
 } from 'react-native';
-import { AdMobRewarded } from 'expo-ads-admob';
+// import { RewardedAd, RewardedAdEventType } from 'react-native-google-mobile-ads';
 import { useAuth } from '../context/AuthContext';
 import { AdMobConfig } from '../config/admob';
 import { designSystem } from '../utils/designSystem';
@@ -15,35 +15,13 @@ import { designSystem } from '../utils/designSystem';
 const RewardedAdButton = ({ onRewardEarned, buttonText = "Watch Ad for 100 Points", disabled = false }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [adLoaded, setAdLoaded] = useState(false);
+  const [rewardedAd, setRewardedAd] = useState(null);
   const { user, updateUserPoints } = useAuth();
 
   useEffect(() => {
-    loadRewardedAd();
-    return () => {
-      // Cleanup
-      AdMobRewarded.removeAllListeners();
-    };
+    // Temporarily disable AdMob for initial testing
+    // setTimeout(() => setAdLoaded(true), 1000);
   }, []);
-
-  const loadRewardedAd = async () => {
-    try {
-      const adUnitId = AdMobConfig.getRewardedAdUnitId();
-      
-      // Set up event listeners
-      AdMobRewarded.addEventListener('rewardedVideoUserDidEarnReward', handleRewardEarned);
-      AdMobRewarded.addEventListener('rewardedVideoDidLoad', () => setAdLoaded(true));
-      AdMobRewarded.addEventListener('rewardedVideoDidFailToLoad', handleAdFailedToLoad);
-      AdMobRewarded.addEventListener('rewardedVideoDidClose', handleAdClosed);
-
-      // Request ad
-      await AdMobRewarded.setAdUnitID(adUnitId);
-      await AdMobRewarded.requestAdAsync();
-      
-    } catch (error) {
-      console.error('Failed to load rewarded ad:', error);
-      handleAdFailedToLoad();
-    }
-  };
 
   const handleRewardEarned = async (reward) => {
     try {
@@ -75,30 +53,11 @@ const RewardedAdButton = ({ onRewardEarned, buttonText = "Watch Ad for 100 Point
     }
   };
 
-  const handleAdFailedToLoad = () => {
-    console.warn('Rewarded ad failed to load');
-    setAdLoaded(false);
-    setIsLoading(false);
-    
-    // Retry loading after delay
-    setTimeout(() => {
-      loadRewardedAd();
-    }, 30000); // Retry after 30 seconds
-  };
-
-  const handleAdClosed = () => {
-    setIsLoading(false);
-    // Ad closed, load new ad for next time
-    if (!adLoaded) {
-      loadRewardedAd();
-    }
-  };
-
   const showRewardedAd = async () => {
     try {
       setIsLoading(true);
 
-      if (!adLoaded) {
+      if (!adLoaded || !rewardedAd) {
         Alert.alert(
           'Ad Not Ready',
           'Please wait a moment while we prepare your ad.',
@@ -123,14 +82,17 @@ const RewardedAdButton = ({ onRewardEarned, buttonText = "Watch Ad for 100 Point
         return;
       }
 
-      // Show the ad
-      const isReady = await AdMobRewarded.getIsReadyAsync();
-      if (isReady) {
-        await AdMobRewarded.showAdAsync();
-        setAdLoaded(false); // Mark as used
-      } else {
-        throw new Error('Ad not ready');
-      }
+      // Demo mode - simulate ad watch
+      Alert.alert(
+        '🎬 Demo Ad Played',
+        'In production, this would show a real rewarded ad!',
+        [{ 
+          text: 'Collect Reward', 
+          onPress: () => {
+            handleRewardEarned({ type: 'demo', amount: 100 });
+          }
+        }]
+      );
 
     } catch (error) {
       console.error('Failed to show rewarded ad:', error);
@@ -151,24 +113,27 @@ const RewardedAdButton = ({ onRewardEarned, buttonText = "Watch Ad for 100 Point
 
   const remainingAds = AdMobConfig.rewardedAdSettings.maxAdsPerDay - getUserAdCount();
   const canWatchAds = remainingAds > 0;
+  
+  // For demo, always show as loaded
+  const demoAdLoaded = true;
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
         style={[
           styles.adButton,
-          (disabled || !canWatchAds || !adLoaded) && styles.disabledButton,
+          (disabled || !canWatchAds || !demoAdLoaded) && styles.disabledButton,
           isLoading && styles.loadingButton
         ]}
         onPress={showRewardedAd}
-        disabled={disabled || isLoading || !canWatchAds || !adLoaded}
+        disabled={disabled || isLoading || !canWatchAds}
       >
         {isLoading ? (
           <ActivityIndicator color="#FFFFFF" />
         ) : (
           <>
             <Text style={styles.adButtonText}>{buttonText}</Text>
-            {!adLoaded && (
+            {!demoAdLoaded && (
               <Text style={styles.loadingText}>Loading ad...</Text>
             )}
           </>

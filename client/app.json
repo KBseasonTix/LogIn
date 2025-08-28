@@ -54,13 +54,12 @@
     },
     "plugins": [
       [
-        "expo-ads-admob",
+        "@stripe/stripe-react-native",
         {
-          "androidAppId": "ca-app-pub-2058319813855923~9410501796",
-          "iosAppId": "ca-app-pub-2058319813855923~4856464524"
+          "merchantIdentifier": "merchant.com.yourcompany.login",
+          "enableGooglePay": true
         }
-      ],
-      "@stripe/stripe-react-native"
+      ]
     ]
   }
 }
