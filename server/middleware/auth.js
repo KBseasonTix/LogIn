@@ -15,7 +15,7 @@ const authenticateToken = (req, res, next) => {
 
     if (!token) {
       return res.status(401).json({
-        message: 'Access denied. No token provided.'
+        message: 'Access denied. No token provided.',
       });
     }
 
@@ -26,23 +26,23 @@ const authenticateToken = (req, res, next) => {
     req.user = {
       id: decoded.id,
       email: decoded.email,
-      subscriptionStatus: decoded.subscriptionStatus
+      subscriptionStatus: decoded.subscriptionStatus,
     };
 
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
       return res.status(403).json({
-        message: 'Invalid token.'
+        message: 'Invalid token.',
       });
     }
     if (error.name === 'TokenExpiredError') {
       return res.status(403).json({
-        message: 'Token expired.'
+        message: 'Token expired.',
       });
     }
     return res.status(500).json({
-      message: 'Authentication failed.'
+      message: 'Authentication failed.',
     });
   }
 };
@@ -53,7 +53,7 @@ const authenticateToken = (req, res, next) => {
 const requirePremium = (req, res, next) => {
   if (req.user.subscriptionStatus !== 'premium') {
     return res.status(403).json({
-      message: 'This feature requires a premium subscription.'
+      message: 'This feature requires a premium subscription.',
     });
   }
   next();
@@ -62,20 +62,20 @@ const requirePremium = (req, res, next) => {
 /**
  * Generate JWT token for user
  */
-const generateToken = (user) => {
+const generateToken = user => {
   const payload = {
     id: user._id,
     email: user.email,
-    subscriptionStatus: user.subscriptionStatus
+    subscriptionStatus: user.subscriptionStatus,
   };
 
   return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: JWT.EXPIRES_IN
+    expiresIn: JWT.EXPIRES_IN,
   });
 };
 
 module.exports = {
   authenticateToken,
   requirePremium,
-  generateToken
+  generateToken,
 };

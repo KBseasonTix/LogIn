@@ -51,7 +51,7 @@ router.get(
     res.json({
       success: true,
       count: communities.length,
-      data: communities
+      data: communities,
     });
   })
 );
@@ -75,7 +75,7 @@ router.get(
 
     res.json({
       success: true,
-      data: community
+      data: community,
     });
   })
 );
@@ -96,7 +96,7 @@ router.post(
     // Get user and community
     const [user, community] = await Promise.all([
       User.findById(userId),
-      Community.findById(communityId)
+      Community.findById(communityId),
     ]);
 
     if (!user) {
@@ -111,7 +111,7 @@ router.post(
     if (user.joinedCommunities.includes(communityId)) {
       return res.status(400).json({
         success: false,
-        message: 'Already a member of this community'
+        message: 'Already a member of this community',
       });
     }
 
@@ -123,12 +123,12 @@ router.post(
       return res.status(403).json({
         success: false,
         message: `Free users can only join ${LIMITS.FREE_COMMUNITIES_MAX} communities. Upgrade to premium for unlimited access.`,
-        upgradeRequired: true
+        upgradeRequired: true,
       });
     }
 
     // Add user to community and community to user (atomically)
-    await withTransaction(async (session) => {
+    await withTransaction(async session => {
       user.joinedCommunities.push(communityId);
       if (!community.members.includes(userId)) {
         community.members.push(userId);
@@ -143,8 +143,8 @@ router.post(
       message: 'Joined community successfully',
       data: {
         userCommunities: user.joinedCommunities,
-        communityMemberCount: community.members.length
-      }
+        communityMemberCount: community.members.length,
+      },
     });
   })
 );
@@ -165,7 +165,7 @@ router.post(
     // Get user and community
     const [user, community] = await Promise.all([
       User.findById(userId),
-      Community.findById(communityId)
+      Community.findById(communityId),
     ]);
 
     if (!user) {
@@ -180,18 +180,14 @@ router.post(
     if (!user.joinedCommunities.includes(communityId)) {
       return res.status(400).json({
         success: false,
-        message: 'Not a member of this community'
+        message: 'Not a member of this community',
       });
     }
 
     // Remove user from community and community from user (atomically)
-    await withTransaction(async (session) => {
-      user.joinedCommunities = user.joinedCommunities.filter(
-        id => id.toString() !== communityId
-      );
-      community.members = community.members.filter(
-        id => id.toString() !== userId
-      );
+    await withTransaction(async session => {
+      user.joinedCommunities = user.joinedCommunities.filter(id => id.toString() !== communityId);
+      community.members = community.members.filter(id => id.toString() !== userId);
 
       await user.save({ session });
       await community.save({ session });
@@ -201,8 +197,8 @@ router.post(
       success: true,
       message: 'Left community successfully',
       data: {
-        userCommunities: user.joinedCommunities
-      }
+        userCommunities: user.joinedCommunities,
+      },
     });
   })
 );

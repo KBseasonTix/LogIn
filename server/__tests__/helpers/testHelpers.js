@@ -18,7 +18,7 @@ const createTestUser = async (userData = {}) => {
     badges: [],
     totalPosts: 0,
     totalReactionsReceived: 0,
-    totalReactionsGiven: 0
+    totalReactionsGiven: 0,
   };
 
   const mergedData = { ...defaultData, ...userData };
@@ -43,7 +43,7 @@ const createTestUsers = async (count = 3) => {
     const user = await createTestUser({
       username: `user${i}`,
       email: `user${i}@example.com`,
-      password: 'Test1234'
+      password: 'Test1234',
     });
     users.push(user);
   }
@@ -54,7 +54,7 @@ const createTestUsers = async (count = 3) => {
 /**
  * Generate JWT token for a user
  */
-const getAuthToken = (user) => {
+const getAuthToken = user => {
   return generateToken(user);
 };
 
@@ -78,7 +78,7 @@ const createTestPost = async (Post, userId, communityId, content = 'Test post') 
     content,
     picture: null,
     positiveMarkers: 0,
-    negativeMarkers: 0
+    negativeMarkers: 0,
   });
 
   return post;
@@ -93,7 +93,7 @@ const createTestCommunity = async (Community, data = {}) => {
     description: 'A test community',
     category: 'Test',
     icon: '🧪',
-    members: []
+    members: [],
   };
 
   const community = await Community.create({ ...defaultData, ...data });
@@ -108,7 +108,7 @@ const createTestBadge = async (Badge, data = {}) => {
     name: 'Test Badge',
     description: 'A test badge',
     cost: 50,
-    icon: '🏅'
+    icon: '🏅',
   };
 
   const badge = await Badge.create({ ...defaultData, ...data });
@@ -118,7 +118,7 @@ const createTestBadge = async (Badge, data = {}) => {
 /**
  * Wait for a specified time (ms)
  */
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 module.exports = {
   createTestUser,
@@ -128,5 +128,5 @@ module.exports = {
   createTestPost,
   createTestCommunity,
   createTestBadge,
-  wait
+  wait,
 };

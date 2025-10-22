@@ -4,34 +4,34 @@ const badgeSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   name: {
     type: String,
-    required: true
+    required: true,
   },
   description: String,
   icon: String,
   cost: {
     type: Number,
     required: true,
-    default: 100
+    default: 100,
   },
   category: {
     type: String,
     enum: ['achievement', 'community', 'milestone', 'special'],
-    default: 'achievement'
+    default: 'achievement',
   },
   requirements: {
     type: String,
     enum: ['posts', 'progress', 'time', 'points'],
-    default: 'points'
+    default: 'points',
   },
   requirementValue: Number,
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model('Badge', badgeSchema);

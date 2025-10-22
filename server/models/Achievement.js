@@ -5,92 +5,103 @@ const achievementSchema = new mongoose.Schema({
   id: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   name: {
     type: String,
-    required: true
+    required: true,
   },
   description: {
     type: String,
-    required: true
+    required: true,
   },
   icon: {
     type: String,
-    required: true
+    required: true,
   },
   category: {
     type: String,
     enum: ['daily_streak', 'goal_progress', 'community_engagement', 'special'],
-    required: true
+    required: true,
   },
   type: {
     type: String,
     enum: ['streak', 'goal', 'community', 'milestone', 'special'],
-    required: true
+    required: true,
   },
   requirements: {
     type: {
       type: String,
-      enum: ['streak_days', 'goal_completion_percentage', 'posts_count', 'reactions_received', 'comments_made', 'manual'],
-      required: true
+      enum: [
+        'streak_days',
+        'goal_completion_percentage',
+        'posts_count',
+        'reactions_received',
+        'comments_made',
+        'manual',
+      ],
+      required: true,
     },
     value: {
       type: Number,
-      required: function() { return this.requirements.type !== 'manual'; }
+      required: function () {
+        return this.requirements.type !== 'manual';
+      },
     },
     additionalCriteria: {
       type: mongoose.Schema.Types.Mixed,
-      default: {}
-    }
+      default: {},
+    },
   },
   rewards: {
     points: {
       type: Number,
       required: true,
       min: 25,
-      max: 2000
+      max: 2000,
     },
-    badges: [{
-      badgeId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Badge'
+    badges: [
+      {
+        badgeId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Badge',
+        },
+        count: {
+          type: Number,
+          default: 1,
+        },
       },
-      count: {
-        type: Number,
-        default: 1
-      }
-    }]
+    ],
   },
   tier: {
     type: String,
     enum: ['bronze', 'silver', 'gold', 'platinum'],
-    default: 'bronze'
+    default: 'bronze',
   },
   isActive: {
     type: Boolean,
-    default: true
+    default: true,
   },
   isRepeatable: {
     type: Boolean,
-    default: false
+    default: false,
   },
   maxCompletions: {
     type: Number,
-    default: 1
+    default: 1,
   },
   order: {
     type: Number,
-    default: 0
+    default: 0,
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 // Indexes for efficient querying

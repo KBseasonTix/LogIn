@@ -34,8 +34,8 @@ router.post(
         email: user.email,
         name: user.username,
         metadata: {
-          userId: user._id.toString()
-        }
+          userId: user._id.toString(),
+        },
       });
       customerId = customer.id;
       user.stripeCustomerId = customerId;
@@ -56,16 +56,16 @@ router.post(
       success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_URL}/cancel`,
       metadata: {
-        userId: user._id.toString()
-      }
+        userId: user._id.toString(),
+      },
     });
 
     res.json({
       success: true,
       data: {
         sessionId: session.id,
-        url: session.url
-      }
+        url: session.url,
+      },
     });
   })
 );
@@ -196,7 +196,7 @@ router.get(
         subscriptionDetails = {
           status: subscription.status,
           currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-          cancelAtPeriodEnd: subscription.cancel_at_period_end
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
         };
       } catch (error) {
         console.error('Error fetching subscription details:', error.message);
@@ -207,8 +207,8 @@ router.get(
       success: true,
       data: {
         subscriptionStatus: user.subscriptionStatus,
-        subscriptionDetails
-      }
+        subscriptionDetails,
+      },
     });
   })
 );
@@ -235,15 +235,15 @@ router.post(
 
     // Cancel subscription at period end
     const subscription = await stripe.subscriptions.update(user.stripeSubscriptionId, {
-      cancel_at_period_end: true
+      cancel_at_period_end: true,
     });
 
     res.json({
       success: true,
       message: 'Subscription will be canceled at the end of the billing period',
       data: {
-        cancelAt: new Date(subscription.current_period_end * 1000)
-      }
+        cancelAt: new Date(subscription.current_period_end * 1000),
+      },
     });
   })
 );

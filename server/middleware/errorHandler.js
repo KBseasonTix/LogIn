@@ -16,7 +16,7 @@ class AppError extends Error {
 /**
  * Handle Mongoose CastError (Invalid ObjectId)
  */
-const handleCastErrorDB = (err) => {
+const handleCastErrorDB = err => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
 };
@@ -24,7 +24,7 @@ const handleCastErrorDB = (err) => {
 /**
  * Handle Mongoose duplicate key error
  */
-const handleDuplicateFieldsDB = (err) => {
+const handleDuplicateFieldsDB = err => {
   const field = Object.keys(err.keyValue)[0];
   const message = `Duplicate field value: ${field}. Please use another value.`;
   return new AppError(message, 400);
@@ -33,7 +33,7 @@ const handleDuplicateFieldsDB = (err) => {
 /**
  * Handle Mongoose validation error
  */
-const handleValidationErrorDB = (err) => {
+const handleValidationErrorDB = err => {
   const errors = Object.values(err.errors).map(el => el.message);
   const message = `Invalid input data. ${errors.join('. ')}`;
   return new AppError(message, 400);
@@ -47,7 +47,7 @@ const sendErrorDev = (err, res) => {
     status: err.status,
     error: err,
     message: err.message,
-    stack: err.stack
+    stack: err.stack,
   });
 };
 
@@ -59,7 +59,7 @@ const sendErrorProd = (err, res) => {
   if (err.isOperational) {
     res.status(err.statusCode).json({
       status: err.status,
-      message: err.message
+      message: err.message,
     });
   }
   // Programming or other unknown error: don't leak error details
@@ -70,7 +70,7 @@ const sendErrorProd = (err, res) => {
     // Send generic message
     res.status(500).json({
       status: 'error',
-      message: 'Something went wrong'
+      message: 'Something went wrong',
     });
   }
 };
@@ -101,7 +101,7 @@ const errorHandler = (err, req, res, _next) => {
  * Middleware to catch async errors
  * Wraps async route handlers to catch errors and pass to error handler
  */
-const catchAsync = (fn) => {
+const catchAsync = fn => {
   return (req, res, next) => {
     fn(req, res, next).catch(next);
   };
@@ -119,5 +119,5 @@ module.exports = {
   AppError,
   errorHandler,
   catchAsync,
-  notFound
+  notFound,
 };

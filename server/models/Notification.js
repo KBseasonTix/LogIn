@@ -5,59 +5,65 @@ const notificationSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   type: {
     type: String,
-    enum: ['achievement_unlocked', 'badge_received', 'streak_milestone', 'goal_progress', 'community_recognition'],
-    required: true
+    enum: [
+      'achievement_unlocked',
+      'badge_received',
+      'streak_milestone',
+      'goal_progress',
+      'community_recognition',
+    ],
+    required: true,
   },
   title: {
     type: String,
-    required: true
+    required: true,
   },
   message: {
     type: String,
-    required: true
+    required: true,
   },
   data: {
     achievementId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Achievement'
+      ref: 'Achievement',
     },
     badgeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Badge'
+      ref: 'Badge',
     },
     badgeGiftId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'BadgeGift'
+      ref: 'BadgeGift',
     },
     fromUserId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
     },
     points: Number,
     streakDays: Number,
-    goalProgress: Number
+    goalProgress: Number,
   },
   isRead: {
     type: Boolean,
-    default: false
+    default: false,
   },
   readAt: {
     type: Date,
-    default: null
+    default: null,
   },
   priority: {
     type: String,
     enum: ['low', 'normal', 'high'],
-    default: 'normal'
+    default: 'normal',
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 // Indexes for efficient querying

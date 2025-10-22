@@ -6,27 +6,28 @@ const options = {
     info: {
       title: 'Fitness Goal Tracker API',
       version: '1.0.0',
-      description: 'A comprehensive fitness tracking and community platform API with gamification features, achievements, and social interactions.',
+      description:
+        'A comprehensive fitness tracking and community platform API with gamification features, achievements, and social interactions.',
       contact: {
         name: 'API Support',
-        email: 'support@fitnesstracker.com'
+        email: 'support@fitnesstracker.com',
       },
       license: {
         name: 'MIT',
-        url: 'https://opensource.org/licenses/MIT'
-      }
+        url: 'https://opensource.org/licenses/MIT',
+      },
     },
     servers: [
       {
         url: 'http://localhost:3000',
-        description: 'Development server'
+        description: 'Development server',
       },
       {
         url: process.env.RAILWAY_PUBLIC_DOMAIN
           ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
           : 'https://your-app.railway.app',
-        description: 'Production server (Railway)'
-      }
+        description: 'Production server (Railway)',
+      },
     ],
     components: {
       securitySchemes: {
@@ -34,8 +35,8 @@ const options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Enter JWT token obtained from /api/auth/login or /api/auth/register'
-        }
+          description: 'Enter JWT token obtained from /api/auth/login or /api/auth/register',
+        },
       },
       schemas: {
         User: {
@@ -49,19 +50,19 @@ const options = {
             joinedCommunities: {
               type: 'array',
               items: { type: 'string' },
-              example: ['507f1f77bcf86cd799439011']
+              example: ['507f1f77bcf86cd799439011'],
             },
             badges: {
               type: 'array',
               items: { type: 'string' },
-              example: []
+              example: [],
             },
             streakDays: { type: 'integer', example: 5 },
             totalReactionsGiven: { type: 'integer', example: 10 },
             totalReactionsReceived: { type: 'integer', example: 8 },
             createdAt: { type: 'string', format: 'date-time' },
-            updatedAt: { type: 'string', format: 'date-time' }
-          }
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
         },
         Community: {
           type: 'object',
@@ -72,8 +73,8 @@ const options = {
             ownerId: { type: 'string' },
             members: { type: 'array', items: { type: 'string' } },
             postsToday: { type: 'integer', example: 15 },
-            createdAt: { type: 'string', format: 'date-time' }
-          }
+            createdAt: { type: 'string', format: 'date-time' },
+          },
         },
         Post: {
           type: 'object',
@@ -86,12 +87,12 @@ const options = {
               type: 'object',
               properties: {
                 thumbsUp: { type: 'integer', example: 5 },
-                fire: { type: 'integer', example: 2 }
-              }
+                fire: { type: 'integer', example: 2 },
+              },
             },
             isMarker: { type: 'boolean', example: false },
-            createdAt: { type: 'string', format: 'date-time' }
-          }
+            createdAt: { type: 'string', format: 'date-time' },
+          },
         },
         Badge: {
           type: 'object',
@@ -101,8 +102,8 @@ const options = {
             description: { type: 'string', example: 'Posted before 6 AM' },
             icon: { type: 'string', example: '🌅' },
             pointsCost: { type: 'integer', example: 50 },
-            available: { type: 'boolean', example: true }
-          }
+            available: { type: 'boolean', example: true },
+          },
         },
         Achievement: {
           type: 'object',
@@ -112,8 +113,8 @@ const options = {
             description: { type: 'string', example: 'Create your first post' },
             type: { type: 'string', enum: ['milestone', 'streak', 'social', 'special'] },
             condition: { type: 'object' },
-            pointsReward: { type: 'integer', example: 10 }
-          }
+            pointsReward: { type: 'integer', example: 10 },
+          },
         },
         Error: {
           type: 'object',
@@ -123,10 +124,10 @@ const options = {
             errors: {
               type: 'array',
               items: { type: 'string' },
-              example: ['Email is required', 'Password must be at least 8 characters']
-            }
-          }
-        }
+              example: ['Email is required', 'Password must be at least 8 characters'],
+            },
+          },
+        },
       },
       responses: {
         UnauthorizedError: {
@@ -136,10 +137,10 @@ const options = {
               schema: { $ref: '#/components/schemas/Error' },
               example: {
                 message: 'Access denied. No token provided.',
-                statusCode: 401
-              }
-            }
-          }
+                statusCode: 401,
+              },
+            },
+          },
         },
         ForbiddenError: {
           description: 'Insufficient permissions',
@@ -148,10 +149,10 @@ const options = {
               schema: { $ref: '#/components/schemas/Error' },
               example: {
                 message: 'Premium membership required',
-                statusCode: 403
-              }
-            }
-          }
+                statusCode: 403,
+              },
+            },
+          },
         },
         ValidationError: {
           description: 'Validation failed',
@@ -161,10 +162,10 @@ const options = {
               example: {
                 message: 'Validation failed',
                 statusCode: 400,
-                errors: ['Email is required']
-              }
-            }
-          }
+                errors: ['Email is required'],
+              },
+            },
+          },
         },
         NotFoundError: {
           description: 'Resource not found',
@@ -173,10 +174,10 @@ const options = {
               schema: { $ref: '#/components/schemas/Error' },
               example: {
                 message: 'Community not found',
-                statusCode: 404
-              }
-            }
-          }
+                statusCode: 404,
+              },
+            },
+          },
         },
         ServerError: {
           description: 'Internal server error',
@@ -185,60 +186,60 @@ const options = {
               schema: { $ref: '#/components/schemas/Error' },
               example: {
                 message: 'An unexpected error occurred',
-                statusCode: 500
-              }
-            }
-          }
-        }
-      }
+                statusCode: 500,
+              },
+            },
+          },
+        },
+      },
     },
     security: [
       {
-        bearerAuth: []
-      }
+        bearerAuth: [],
+      },
     ],
     tags: [
       {
         name: 'Authentication',
-        description: 'User authentication and registration endpoints'
+        description: 'User authentication and registration endpoints',
       },
       {
         name: 'Communities',
-        description: 'Community management and membership operations'
+        description: 'Community management and membership operations',
       },
       {
         name: 'Posts',
-        description: 'Post creation, reactions, and management'
+        description: 'Post creation, reactions, and management',
       },
       {
         name: 'Badges',
-        description: 'Badge redemption and gifting'
+        description: 'Badge redemption and gifting',
       },
       {
         name: 'Badge Gifts',
-        description: 'Badge gift management'
+        description: 'Badge gift management',
       },
       {
         name: 'Achievements',
-        description: 'Achievement tracking and progress'
+        description: 'Achievement tracking and progress',
       },
       {
         name: 'Leaderboard',
-        description: 'User rankings and statistics'
+        description: 'User rankings and statistics',
       },
       {
         name: 'Notifications',
-        description: 'User notifications'
+        description: 'User notifications',
       },
       {
         name: 'Analytics',
-        description: 'Usage statistics and analytics'
+        description: 'Usage statistics and analytics',
       },
       {
         name: 'Health',
-        description: 'Health check and system status endpoints'
-      }
-    ]
+        description: 'Health check and system status endpoints',
+      },
+    ],
   },
   apis: ['./routes/*.js', './server.js'], // Path to the API routes
 };

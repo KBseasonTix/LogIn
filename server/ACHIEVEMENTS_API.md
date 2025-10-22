@@ -36,12 +36,15 @@ The LogIn productivity app achievement system provides comprehensive gamificatio
 ### Achievements
 
 #### GET /api/achievements
+
 Get all available achievements
 
 **Query Parameters:**
+
 - `category` (optional): Filter by category (daily_streak, goal_progress, community_engagement, special)
 
 **Response:**
+
 ```json
 [
   {
@@ -63,18 +66,23 @@ Get all available achievements
 ```
 
 #### GET /api/achievements/user/:userId
+
 Get user's achievement progress
 
 **Query Parameters:**
+
 - `category` (optional): Filter by category
 - `completed` (optional): Filter by completion status
 
 **Response:**
+
 ```json
 [
   {
     "id": "user_achievement_id",
-    "achievement": { /* Achievement object */ },
+    "achievement": {
+      /* Achievement object */
+    },
     "progress": {
       "current": 5,
       "target": 7,
@@ -88,9 +96,11 @@ Get user's achievement progress
 ```
 
 #### GET /api/achievements/user/:userId/stats
+
 Get user achievement statistics
 
 **Response:**
+
 ```json
 {
   "totalAchievements": 15,
@@ -112,15 +122,19 @@ Get user achievement statistics
 ```
 
 #### GET /api/achievements/leaderboard/:type
+
 Get leaderboards
 
 **Parameters:**
+
 - `type`: points, achievements, streak, posts
 
 **Query Parameters:**
+
 - `limit` (optional): Number of results (default: 50)
 
 **Response:**
+
 ```json
 {
   "type": "points",
@@ -141,9 +155,11 @@ Get leaderboards
 ### Streaks
 
 #### GET /api/streaks/user/:userId
+
 Get user's streak information
 
 **Response:**
+
 ```json
 {
   "currentStreak": 12,
@@ -165,9 +181,11 @@ Get user's streak information
 ```
 
 #### POST /api/streaks/user/:userId/update
+
 Update user's streak (called when user posts)
 
 **Request Body:**
+
 ```json
 {
   "timezone": "America/New_York"
@@ -175,6 +193,7 @@ Update user's streak (called when user posts)
 ```
 
 **Response:**
+
 ```json
 {
   "currentStreak": 13,
@@ -185,12 +204,15 @@ Update user's streak (called when user posts)
 ```
 
 #### GET /api/streaks/leaderboard
+
 Get streak leaderboard
 
 **Query Parameters:**
+
 - `limit` (optional): Number of results (default: 50)
 
 **Response:**
+
 ```json
 {
   "leaderboard": [
@@ -212,9 +234,11 @@ Get streak leaderboard
 ### Badge Gifting
 
 #### POST /api/badge-gifts/send
+
 Send a badge gift to another user
 
 **Request Body:**
+
 ```json
 {
   "fromUserId": "sender_id",
@@ -228,12 +252,15 @@ Send a badge gift to another user
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Badge gift sent successfully",
   "badgeGift": {
     "id": "gift_id",
-    "badge": { /* Badge object */ },
+    "badge": {
+      /* Badge object */
+    },
     "message": "Great job on your streak!",
     "pointsCost": 50,
     "sentAt": "2024-01-15T10:30:00Z",
@@ -244,13 +271,16 @@ Send a badge gift to another user
 ```
 
 #### GET /api/badge-gifts/received/:userId
+
 Get badge gifts received by user
 
 **Query Parameters:**
+
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Results per page (default: 20)
 
 **Response:**
+
 ```json
 {
   "gifts": [
@@ -282,9 +312,11 @@ Get badge gifts received by user
 ```
 
 #### GET /api/badge-gifts/available/:userId
+
 Get badges available for gifting
 
 **Response:**
+
 ```json
 {
   "giftableBadges": [
@@ -304,13 +336,16 @@ Get badges available for gifting
 ### Notifications
 
 #### GET /api/notifications/user/:userId
+
 Get user notifications
 
 **Query Parameters:**
+
 - `limit` (optional): Number of results (default: 20)
 - `onlyUnread` (optional): Show only unread notifications
 
 **Response:**
+
 ```json
 {
   "notifications": [
@@ -333,9 +368,11 @@ Get user notifications
 ```
 
 #### PATCH /api/notifications/:notificationId/read
+
 Mark notification as read
 
 **Request Body:**
+
 ```json
 {
   "userId": "user_id"
@@ -345,12 +382,15 @@ Mark notification as read
 ### Analytics
 
 #### GET /api/analytics/achievements/engagement
+
 Get achievement engagement analytics
 
 **Query Parameters:**
+
 - `period` (optional): day, week, month, year
 
 **Response:**
+
 ```json
 {
   "period": "week",
@@ -359,7 +399,9 @@ Get achievement engagement analytics
   "completionRate": 75,
   "popularAchievements": [
     {
-      "achievement": { /* Achievement object */ },
+      "achievement": {
+        /* Achievement object */
+      },
       "completionCount": 25,
       "uniqueUserCount": 20
     }
@@ -380,12 +422,15 @@ Get achievement engagement analytics
 ```
 
 #### GET /api/analytics/dashboard
+
 Get comprehensive dashboard analytics
 
 **Query Parameters:**
+
 - `period` (optional): day, week, month
 
 **Response:**
+
 ```json
 {
   "period": "week",
@@ -412,7 +457,7 @@ Get comprehensive dashboard analytics
 
 - **10 points** per post
 - **5 points** per positive reaction received
-- **5 points** per positive reaction given  
+- **5 points** per positive reaction given
 - **25-2000 bonus points** for achievements (varies by tier)
 - **30-70 points cost** for badge gifting
 

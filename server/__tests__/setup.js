@@ -2,7 +2,7 @@
 
 // Set test environment variables
 process.env.NODE_ENV = 'test';
-process.env.MONGODB_URI = 'mongodb://localhost:27017/test-db';  // Will be overridden by MongoMemoryServer
+process.env.MONGODB_URI = 'mongodb://localhost:27017/test-db'; // Will be overridden by MongoMemoryServer
 process.env.JWT_SECRET = 'test-jwt-secret-for-testing-only';
 process.env.STRIPE_SECRET_KEY = 'sk_test_mock_key';
 process.env.STRIPE_WEBHOOK_SECRET = 'whsec_mock_secret';

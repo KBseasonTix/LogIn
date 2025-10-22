@@ -36,9 +36,7 @@ describe('GET /api/communities', () => {
   it('should reject unauthenticated request', async () => {
     await seedDatabase();
 
-    const response = await request(app)
-      .get('/api/communities')
-      .expect(401);
+    const response = await request(app).get('/api/communities').expect(401);
 
     expect(response.body.message).toContain('No token');
   });
@@ -59,7 +57,7 @@ describe('GET /api/communities/:id', () => {
   it('should return a specific community', async () => {
     const { token } = await createAuthenticatedUser();
     const community = await createTestCommunity(Community, {
-      name: 'Specific Community'
+      name: 'Specific Community',
     });
 
     const response = await request(app)
@@ -115,7 +113,7 @@ describe('POST /api/communities/join', () => {
   it('should prevent duplicate joins', async () => {
     const { user, token } = await createAuthenticatedUser();
     const community = await createTestCommunity(Community, {
-      members: [user._id]
+      members: [user._id],
     });
 
     // User already in community
@@ -134,7 +132,7 @@ describe('POST /api/communities/join', () => {
   it('should enforce free tier limit of 2 communities', async () => {
     const { token } = await createAuthenticatedUser({
       subscriptionStatus: 'free',
-      joinedCommunities: []
+      joinedCommunities: [],
     });
 
     // Create 3 communities
@@ -169,14 +167,14 @@ describe('POST /api/communities/join', () => {
   it('should allow premium users to join unlimited communities', async () => {
     const { token } = await createAuthenticatedUser({
       subscriptionStatus: 'premium',
-      joinedCommunities: []
+      joinedCommunities: [],
     });
 
     // Create 3 communities
     const communities = await Promise.all([
       createTestCommunity(Community, { name: 'Community 1' }),
       createTestCommunity(Community, { name: 'Community 2' }),
-      createTestCommunity(Community, { name: 'Community 3' })
+      createTestCommunity(Community, { name: 'Community 3' }),
     ]);
 
     // Join all three communities
@@ -216,7 +214,7 @@ describe('POST /api/communities/leave', () => {
   it('should allow user to leave a community', async () => {
     const { user, token } = await createAuthenticatedUser();
     const community = await createTestCommunity(Community, {
-      members: [user._id]
+      members: [user._id],
     });
 
     user.joinedCommunities.push(community._id);

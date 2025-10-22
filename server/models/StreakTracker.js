@@ -6,64 +6,66 @@ const streakTrackerSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    unique: true
+    unique: true,
   },
   currentStreak: {
     type: Number,
-    default: 0
+    default: 0,
   },
   longestStreak: {
     type: Number,
-    default: 0
+    default: 0,
   },
   lastPostDate: {
     type: Date,
-    default: null
+    default: null,
   },
   streakStartDate: {
     type: Date,
-    default: null
+    default: null,
   },
   timezone: {
     type: String,
-    default: 'UTC'
+    default: 'UTC',
   },
-  streakHistory: [{
-    date: {
-      type: Date,
-      required: true
+  streakHistory: [
+    {
+      date: {
+        type: Date,
+        required: true,
+      },
+      postsCount: {
+        type: Number,
+        default: 0,
+      },
+      streakDay: {
+        type: Number,
+        required: true,
+      },
     },
-    postsCount: {
-      type: Number,
-      default: 0
-    },
-    streakDay: {
-      type: Number,
-      required: true
-    }
-  }],
+  ],
   achievements: {
     streak7: {
       type: Boolean,
-      default: false
+      default: false,
     },
     streak30: {
       type: Boolean,
-      default: false
+      default: false,
     },
     streak100: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 // Index for efficient querying
@@ -72,11 +74,11 @@ streakTrackerSchema.index({ currentStreak: -1 });
 streakTrackerSchema.index({ longestStreak: -1 });
 
 // Method to update streak based on post date
-streakTrackerSchema.methods.updateStreak = function(postDate, userTimezone = 'UTC') {
+streakTrackerSchema.methods.updateStreak = function (postDate, userTimezone = 'UTC') {
   const now = new Date(postDate);
-  const userDate = new Date(now.toLocaleString("en-US", {timeZone: userTimezone}));
+  const userDate = new Date(now.toLocaleString('en-US', { timeZone: userTimezone }));
   const todayStr = userDate.toDateString();
-  
+
   if (!this.lastPostDate) {
     // First post ever
     this.currentStreak = 1;
@@ -86,13 +88,15 @@ streakTrackerSchema.methods.updateStreak = function(postDate, userTimezone = 'UT
     this.streakHistory.push({
       date: userDate,
       postsCount: 1,
-      streakDay: 1
+      streakDay: 1,
     });
   } else {
-    const lastPostUserDate = new Date(this.lastPostDate.toLocaleString("en-US", {timeZone: userTimezone}));
+    const lastPostUserDate = new Date(
+      this.lastPostDate.toLocaleString('en-US', { timeZone: userTimezone })
+    );
     const lastPostStr = lastPostUserDate.toDateString();
     const daysDiff = Math.floor((userDate - lastPostUserDate) / (1000 * 60 * 60 * 24));
-    
+
     if (todayStr === lastPostStr) {
       // Same day, just increment post count
       const todayRecord = this.streakHistory.find(h => h.date.toDateString() === todayStr);
@@ -107,7 +111,7 @@ streakTrackerSchema.methods.updateStreak = function(postDate, userTimezone = 'UT
       this.streakHistory.push({
         date: userDate,
         postsCount: 1,
-        streakDay: this.currentStreak
+        streakDay: this.currentStreak,
       });
     } else if (daysDiff > 1) {
       // Streak broken, start new streak
@@ -117,11 +121,11 @@ streakTrackerSchema.methods.updateStreak = function(postDate, userTimezone = 'UT
       this.streakHistory.push({
         date: userDate,
         postsCount: 1,
-        streakDay: 1
+        streakDay: 1,
       });
     }
   }
-  
+
   this.timezone = userTimezone;
   this.updatedAt = new Date();
 };

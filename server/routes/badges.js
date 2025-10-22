@@ -26,7 +26,7 @@ router.get(
     res.json({
       success: true,
       count: badges.length,
-      data: badges
+      data: badges,
     });
   })
 );
@@ -53,8 +53,8 @@ router.get(
       success: true,
       data: {
         allBadges: user.badges,
-        giftableBadges
-      }
+        giftableBadges,
+      },
     });
   })
 );
@@ -72,10 +72,7 @@ router.post(
     const { badgeId } = req.body;
     const userId = req.user.id;
 
-    const [user, badge] = await Promise.all([
-      User.findById(userId),
-      Badge.findById(badgeId)
-    ]);
+    const [user, badge] = await Promise.all([User.findById(userId), Badge.findById(badgeId)]);
 
     if (!user) {
       throw new AppError('User not found', 404);
@@ -91,7 +88,7 @@ router.post(
         success: false,
         message: 'Not enough points to redeem this badge',
         required: badge.cost,
-        current: user.points
+        current: user.points,
       });
     }
 
@@ -99,9 +96,7 @@ router.post(
     user.points -= badge.cost;
 
     // Add or increment badge in user's collection
-    const existingBadge = user.badges.find(
-      b => b.badgeId && b.badgeId.toString() === badgeId
-    );
+    const existingBadge = user.badges.find(b => b.badgeId && b.badgeId.toString() === badgeId);
 
     if (existingBadge) {
       existingBadge.count += 1;
@@ -116,7 +111,7 @@ router.post(
       userId,
       type: TRANSACTION_TYPES.REDEEM,
       amount: badge.cost,
-      badgeId
+      badgeId,
     });
     await transaction.save();
 
@@ -125,8 +120,8 @@ router.post(
       message: 'Badge redeemed successfully',
       data: {
         points: user.points,
-        badges: user.badges
-      }
+        badges: user.badges,
+      },
     });
   })
 );
@@ -150,7 +145,7 @@ router.post(
 
     const [sender, recipient] = await Promise.all([
       User.findById(senderId),
-      User.findById(recipientId)
+      User.findById(recipientId),
     ]);
 
     if (!sender) {
@@ -162,12 +157,10 @@ router.post(
     }
 
     // Find the badge in sender's collection
-    const badgeIndex = sender.badges.findIndex(
-      b => b.badgeId && b.badgeId.toString() === badgeId
-    );
+    const badgeIndex = sender.badges.findIndex(b => b.badgeId && b.badgeId.toString() === badgeId);
 
     if (badgeIndex === -1 || sender.badges[badgeIndex].count <= 0) {
-      throw new AppError('You don\'t have this badge to gift', 400);
+      throw new AppError("You don't have this badge to gift", 400);
     }
 
     // Decrement sender's badge count
@@ -186,21 +179,18 @@ router.post(
     } else {
       recipient.badges.push({
         badgeId,
-        count: 1
+        count: 1,
       });
     }
 
-    await Promise.all([
-      sender.save(),
-      recipient.save()
-    ]);
+    await Promise.all([sender.save(), recipient.save()]);
 
     // Create notification for recipient
     const notification = new Notification({
       userId: recipientId,
       message: `${sender.username} gifted you a badge${message ? ': ' + message : ''}`,
       type: 'badge-gift',
-      read: false
+      read: false,
     });
     await notification.save();
 
@@ -209,8 +199,8 @@ router.post(
       message: 'Badge gifted successfully',
       data: {
         senderBadges: sender.badges,
-        recipientBadges: recipient.badges
-      }
+        recipientBadges: recipient.badges,
+      },
     });
   })
 );
@@ -233,7 +223,7 @@ router.get(
 
     res.json({
       success: true,
-      data: community.badges || []
+      data: community.badges || [],
     });
   })
 );

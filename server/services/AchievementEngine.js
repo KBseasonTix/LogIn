@@ -30,8 +30,9 @@ class AchievementEngine {
       const user = await User.findById(userId);
       if (!user) return;
 
-      const relevantAchievements = Array.from(this.achievements.values())
-        .filter(achievement => this.isRelevantForEvent(achievement, eventType));
+      const relevantAchievements = Array.from(this.achievements.values()).filter(achievement =>
+        this.isRelevantForEvent(achievement, eventType)
+      );
 
       for (const achievement of relevantAchievements) {
         await this.evaluateAchievement(user, achievement, eventData);
@@ -43,13 +44,13 @@ class AchievementEngine {
 
   isRelevantForEvent(achievement, eventType) {
     const eventMapping = {
-      'post_created': ['posts_count', 'streak_days'],
-      'reaction_given': ['reactions_given'],
-      'reaction_received': ['reactions_received'],
-      'comment_made': ['comments_made'],
-      'goal_progress_updated': ['goal_completion_percentage'],
-      'streak_updated': ['streak_days'],
-      'manual_award': ['manual']
+      post_created: ['posts_count', 'streak_days'],
+      reaction_given: ['reactions_given'],
+      reaction_received: ['reactions_received'],
+      comment_made: ['comments_made'],
+      goal_progress_updated: ['goal_completion_percentage'],
+      streak_updated: ['streak_days'],
+      manual_award: ['manual'],
     };
 
     return eventMapping[eventType]?.includes(achievement.requirements.type);
@@ -60,7 +61,7 @@ class AchievementEngine {
       // Get or create user achievement record
       let userAchievement = await UserAchievement.findOne({
         userId: user._id,
-        achievementId: achievement._id
+        achievementId: achievement._id,
       });
 
       if (!userAchievement) {
@@ -69,8 +70,8 @@ class AchievementEngine {
           achievementId: achievement._id,
           progress: {
             current: 0,
-            target: achievement.requirements.value || 1
-          }
+            target: achievement.requirements.value || 1,
+          },
         });
       }
 
@@ -86,7 +87,7 @@ class AchievementEngine {
 
       // Calculate current progress based on achievement type
       const currentProgress = await this.calculateProgress(user, achievement, eventData);
-      
+
       // Update progress
       const oldProgress = userAchievement.progress.current;
       userAchievement.progress.current = currentProgress;
@@ -100,7 +101,6 @@ class AchievementEngine {
       if (oldProgress !== currentProgress) {
         await userAchievement.save();
       }
-
     } catch (error) {
       console.error('Error evaluating achievement:', achievement.id, error);
     }
@@ -149,7 +149,7 @@ class AchievementEngine {
       userAchievement.isCompleted = true;
       userAchievement.completedAt = new Date();
       userAchievement.completionCount += 1;
-      
+
       // Add to user's achievements array
       const existingAchievement = user.achievements.find(
         a => a.achievementId.toString() === achievement._id.toString()
@@ -161,7 +161,7 @@ class AchievementEngine {
         user.achievements.push({
           achievementId: achievement._id,
           unlockedAt: new Date(),
-          completionCount: 1
+          completionCount: 1,
         });
       }
 
@@ -182,17 +182,14 @@ class AchievementEngine {
           } else {
             user.badges.push({
               badgeId: badgeReward.badgeId,
-              count: badgeReward.count
+              count: badgeReward.count,
             });
           }
         }
       }
 
       // Save changes
-      await Promise.all([
-        userAchievement.save(),
-        user.save()
-      ]);
+      await Promise.all([userAchievement.save(), user.save()]);
 
       // Record transaction
       const transaction = new Transaction({
@@ -200,7 +197,7 @@ class AchievementEngine {
         type: 'achievement_bonus',
         amount: achievement.rewards.points,
         reason: `Achievement unlocked: ${achievement.name}`,
-        achievementId: achievement._id
+        achievementId: achievement._id,
       });
       await transaction.save();
 
@@ -212,13 +209,12 @@ class AchievementEngine {
         message: `Congratulations! You've unlocked "${achievement.name}"`,
         data: {
           achievementId: achievement._id,
-          points: achievement.rewards.points
+          points: achievement.rewards.points,
         },
-        priority: 'high'
+        priority: 'high',
       });
 
       console.log(`Achievement awarded: ${achievement.name} to user ${user.username}`);
-
     } catch (error) {
       console.error('Error awarding achievement:', error);
     }
@@ -236,9 +232,8 @@ class AchievementEngine {
         this.checkAndAwardAchievements(userId, 'reaction_received'),
         this.checkAndAwardAchievements(userId, 'comment_made'),
         this.checkAndAwardAchievements(userId, 'goal_progress_updated'),
-        this.checkAndAwardAchievements(userId, 'streak_updated')
+        this.checkAndAwardAchievements(userId, 'streak_updated'),
       ]);
-
     } catch (error) {
       console.error('Error recalculating achievements:', error);
     }
@@ -260,9 +255,8 @@ class AchievementEngine {
         progress: ua.progress,
         isCompleted: ua.isCompleted,
         completedAt: ua.completedAt,
-        completionCount: ua.completionCount
+        completionCount: ua.completionCount,
       }));
-
     } catch (error) {
       console.error('Error getting achievement progress:', error);
       return [];
@@ -297,9 +291,8 @@ class AchievementEngine {
         profilePic: user.profilePic,
         value: user[sortField],
         totalAchievements: user.totalAchievements,
-        currentStreak: user.currentStreak
+        currentStreak: user.currentStreak,
       }));
-
     } catch (error) {
       console.error('Error getting leaderboard:', error);
       return [];

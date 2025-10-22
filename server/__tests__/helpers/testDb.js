@@ -69,22 +69,22 @@ const seedDatabase = async () => {
       description: 'For people who love fitness',
       category: 'Health',
       icon: '💪',
-      members: []
+      members: [],
     },
     {
       name: 'Yoga Lovers',
       description: 'Yoga and meditation community',
       category: 'Wellness',
       icon: '🧘',
-      members: []
+      members: [],
     },
     {
       name: 'Running Club',
       description: 'Runners unite!',
       category: 'Sports',
       icon: '🏃',
-      members: []
-    }
+      members: [],
+    },
   ]);
 
   // Create test badges
@@ -93,14 +93,14 @@ const seedDatabase = async () => {
       name: 'Gold Star',
       description: 'A gold star badge',
       cost: 100,
-      icon: '⭐'
+      icon: '⭐',
     },
     {
       name: 'Trophy',
       description: 'A trophy badge',
       cost: 200,
-      icon: '🏆'
-    }
+      icon: '🏆',
+    },
   ]);
 
   // Create test achievements
@@ -111,7 +111,7 @@ const seedDatabase = async () => {
       icon: '📝',
       points: 10,
       trigger: 'post_created',
-      condition: { field: 'totalPosts', operator: 'gte', value: 1 }
+      condition: { field: 'totalPosts', operator: 'gte', value: 1 },
     },
     {
       name: 'Social Butterfly',
@@ -119,8 +119,8 @@ const seedDatabase = async () => {
       icon: '🦋',
       points: 50,
       trigger: 'reaction_received',
-      condition: { field: 'totalReactionsReceived', operator: 'gte', value: 10 }
-    }
+      condition: { field: 'totalReactionsReceived', operator: 'gte', value: 10 },
+    },
   ]);
 
   return { communities, badges, achievements };
@@ -130,5 +130,5 @@ module.exports = {
   connect,
   disconnect,
   clearDatabase,
-  seedDatabase
+  seedDatabase,
 };

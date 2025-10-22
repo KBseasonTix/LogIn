@@ -7,126 +7,134 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     minlength: 3,
-    maxlength: 15
+    maxlength: 15,
   },
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   password: {
     type: String,
-    required: true
+    required: true,
   },
   profilePic: {
     type: String,
-    default: null
+    default: null,
   },
-  goals: [{
-    goalId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Goal'
+  goals: [
+    {
+      goalId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Goal',
+      },
+      description: String,
+      targetDate: Date,
+      currentProgress: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 100,
+      },
     },
-    description: String,
-    targetDate: Date,
-    currentProgress: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100
-    }
-  }],
-  joinedCommunities: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Community'
-  }],
+  ],
+  joinedCommunities: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Community',
+    },
+  ],
   points: {
     type: Number,
-    default: 0
+    default: 0,
   },
-  badges: [{
-    badgeId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Badge'
+  badges: [
+    {
+      badgeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Badge',
+      },
+      count: {
+        type: Number,
+        default: 1,
+      },
     },
-    count: {
-      type: Number,
-      default: 1
-    }
-  }],
+  ],
   subscriptionStatus: {
     type: String,
     enum: ['free', 'premium'],
-    default: 'free'
+    default: 'free',
   },
   stripeCustomerId: String,
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   lastActive: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   // Achievement system fields
-  achievements: [{
-    achievementId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Achievement'
+  achievements: [
+    {
+      achievementId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Achievement',
+      },
+      unlockedAt: {
+        type: Date,
+        default: Date.now,
+      },
+      completionCount: {
+        type: Number,
+        default: 1,
+      },
     },
-    unlockedAt: {
-      type: Date,
-      default: Date.now
-    },
-    completionCount: {
-      type: Number,
-      default: 1
-    }
-  }],
+  ],
   totalAchievements: {
     type: Number,
-    default: 0
+    default: 0,
   },
   currentStreak: {
     type: Number,
-    default: 0
+    default: 0,
   },
   longestStreak: {
     type: Number,
-    default: 0
+    default: 0,
   },
   totalPosts: {
     type: Number,
-    default: 0
+    default: 0,
   },
   totalReactionsGiven: {
     type: Number,
-    default: 0
+    default: 0,
   },
   totalReactionsReceived: {
     type: Number,
-    default: 0
+    default: 0,
   },
   totalCommentsGiven: {
     type: Number,
-    default: 0
+    default: 0,
   },
   badgesGifted: {
     type: Number,
-    default: 0
+    default: 0,
   },
   badgesReceived: {
     type: Number,
-    default: 0
+    default: 0,
   },
   leaderboardRank: {
     type: Number,
-    default: null
+    default: null,
   },
   timezone: {
     type: String,
-    default: 'UTC'
-  }
+    default: 'UTC',
+  },
 });
 
 module.exports = mongoose.model('User', userSchema);

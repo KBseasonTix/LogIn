@@ -13,13 +13,13 @@ class StreakService {
   async updateUserStreak(userId, timezone = 'UTC') {
     try {
       let streakTracker = await StreakTracker.findOne({ userId });
-      
+
       if (!streakTracker) {
         streakTracker = new StreakTracker({
           userId,
           timezone,
           currentStreak: 0,
-          longestStreak: 0
+          longestStreak: 0,
         });
       }
 
@@ -46,16 +46,15 @@ class StreakService {
       // Trigger achievement engine
       await AchievementEngine.checkAndAwardAchievements(userId, 'streak_updated', {
         currentStreak: streakTracker.currentStreak,
-        previousStreak
+        previousStreak,
       });
 
       return {
         currentStreak: streakTracker.currentStreak,
         longestStreak: streakTracker.longestStreak,
         streakStartDate: streakTracker.streakStartDate,
-        milestoneReached: this.STREAK_MILESTONES.includes(streakTracker.currentStreak)
+        milestoneReached: this.STREAK_MILESTONES.includes(streakTracker.currentStreak),
       };
-
     } catch (error) {
       console.error('Error updating user streak:', error);
       throw error;
@@ -99,17 +98,19 @@ class StreakService {
 
       // Find all users with current streaks > 0
       const activeStreakUsers = await StreakTracker.find({
-        currentStreak: { $gt: 0 }
+        currentStreak: { $gt: 0 },
       });
 
       let brokensStreaks = 0;
 
       for (const streakTracker of activeStreakUsers) {
         const userTimezone = streakTracker.timezone || 'UTC';
-        const userYesterday = new Date(yesterday.toLocaleString("en-US", {timeZone: userTimezone}));
+        const userYesterday = new Date(
+          yesterday.toLocaleString('en-US', { timeZone: userTimezone })
+        );
         userYesterday.setHours(0, 0, 0, 0);
 
-        const userToday = new Date(today.toLocaleString("en-US", {timeZone: userTimezone}));
+        const userToday = new Date(today.toLocaleString('en-US', { timeZone: userTimezone }));
         userToday.setHours(0, 0, 0, 0);
 
         // Check if user posted yesterday
@@ -117,17 +118,21 @@ class StreakService {
           userId: streakTracker.userId,
           createdAt: {
             $gte: userYesterday,
-            $lt: userToday
-          }
+            $lt: userToday,
+          },
         });
 
         // If no posts yesterday and streak tracker shows they should have posted
         if (yesterdayPosts === 0) {
           const lastPostDate = streakTracker.lastPostDate;
           if (lastPostDate) {
-            const lastPostUserDate = new Date(lastPostDate.toLocaleString("en-US", {timeZone: userTimezone}));
-            const daysSinceLastPost = Math.floor((userToday - lastPostUserDate) / (1000 * 60 * 60 * 24));
-            
+            const lastPostUserDate = new Date(
+              lastPostDate.toLocaleString('en-US', { timeZone: userTimezone })
+            );
+            const daysSinceLastPost = Math.floor(
+              (userToday - lastPostUserDate) / (1000 * 60 * 60 * 24)
+            );
+
             if (daysSinceLastPost > 1) {
               // Streak is broken
               streakTracker.currentStreak = 0;
@@ -142,7 +147,9 @@ class StreakService {
               }
 
               brokensStreaks++;
-              console.log(`Streak reset for user ${streakTracker.userId} (${daysSinceLastPost} days since last post)`);
+              console.log(
+                `Streak reset for user ${streakTracker.userId} (${daysSinceLastPost} days since last post)`
+              );
             }
           }
         }
@@ -150,7 +157,6 @@ class StreakService {
 
       console.log(`Reset ${brokensStreaks} broken streaks`);
       return brokensStreaks;
-
     } catch (error) {
       console.error('Error resetting broken streaks:', error);
       return 0;
@@ -160,7 +166,7 @@ class StreakService {
   async getUserStreakStats(userId) {
     try {
       const streakTracker = await StreakTracker.findOne({ userId });
-      
+
       if (!streakTracker) {
         return {
           currentStreak: 0,
@@ -170,8 +176,8 @@ class StreakService {
           achievements: {
             streak7: false,
             streak30: false,
-            streak100: false
-          }
+            streak100: false,
+          },
         };
       }
 
@@ -181,9 +187,8 @@ class StreakService {
         streakStartDate: streakTracker.streakStartDate,
         totalDaysTracked: streakTracker.streakHistory.length,
         achievements: streakTracker.achievements,
-        recentHistory: streakTracker.streakHistory.slice(-30) // Last 30 days
+        recentHistory: streakTracker.streakHistory.slice(-30), // Last 30 days
       };
-
     } catch (error) {
       console.error('Error getting user streak stats:', error);
       return null;
@@ -193,20 +198,19 @@ class StreakService {
   async getStreakLeaderboard(limit = 50) {
     try {
       const leaderboard = await StreakTracker.find({
-        currentStreak: { $gt: 0 }
+        currentStreak: { $gt: 0 },
       })
-      .populate('userId', 'username profilePic')
-      .sort({ currentStreak: -1, longestStreak: -1 })
-      .limit(limit);
+        .populate('userId', 'username profilePic')
+        .sort({ currentStreak: -1, longestStreak: -1 })
+        .limit(limit);
 
       return leaderboard.map((entry, index) => ({
         rank: index + 1,
         user: entry.userId,
         currentStreak: entry.currentStreak,
         longestStreak: entry.longestStreak,
-        streakStartDate: entry.streakStartDate
+        streakStartDate: entry.streakStartDate,
       }));
-
     } catch (error) {
       console.error('Error getting streak leaderboard:', error);
       return [];
@@ -222,12 +226,11 @@ class StreakService {
 
       const totalUsers = await StreakTracker.countDocuments({});
       const usersWithLowerStreak = await StreakTracker.countDocuments({
-        currentStreak: { $lt: userStreak.currentStreak }
+        currentStreak: { $lt: userStreak.currentStreak },
       });
 
       const percentile = Math.round((usersWithLowerStreak / totalUsers) * 100);
       return percentile;
-
     } catch (error) {
       console.error('Error calculating streak percentile:', error);
       return 0;

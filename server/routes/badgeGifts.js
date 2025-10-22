@@ -29,7 +29,7 @@ router.post('/send', async (req, res) => {
     const [fromUser, toUser, badge] = await Promise.all([
       User.findById(fromUserId),
       User.findById(toUserId),
-      Badge.findById(badgeId)
+      Badge.findById(badgeId),
     ]);
 
     if (!fromUser || !toUser || !badge) {
@@ -42,10 +42,10 @@ router.post('/send', async (req, res) => {
 
     // Check if sender has enough points
     if (fromUser.points < pointsCost) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: 'Not enough points',
         required: pointsCost,
-        current: fromUser.points
+        current: fromUser.points,
       });
     }
 
@@ -56,7 +56,7 @@ router.post('/send', async (req, res) => {
       amount: -pointsCost,
       reason: `Badge gift to ${toUser.username}`,
       badgeId,
-      relatedUserId: toUserId
+      relatedUserId: toUserId,
     });
 
     // Create badge gift record
@@ -69,8 +69,8 @@ router.post('/send', async (req, res) => {
       transactionId: transaction._id,
       metadata: {
         occasion: occasion || 'other',
-        isAnonymous: isAnonymous || false
-      }
+        isAnonymous: isAnonymous || false,
+      },
     });
 
     // Update sender's points and badge gifted count
@@ -78,28 +78,21 @@ router.post('/send', async (req, res) => {
     fromUser.badgesGifted += 1;
 
     // Add badge to recipient
-    const existingBadge = toUser.badges.find(
-      b => b.badgeId.toString() === badgeId.toString()
-    );
+    const existingBadge = toUser.badges.find(b => b.badgeId.toString() === badgeId.toString());
 
     if (existingBadge) {
       existingBadge.count += 1;
     } else {
       toUser.badges.push({
         badgeId,
-        count: 1
+        count: 1,
       });
     }
 
     toUser.badgesReceived += 1;
 
     // Save all changes
-    await Promise.all([
-      transaction.save(),
-      badgeGift.save(),
-      fromUser.save(),
-      toUser.save()
-    ]);
+    await Promise.all([transaction.save(), badgeGift.save(), fromUser.save(), toUser.save()]);
 
     // Update badge gift with transaction ID
     badgeGift.transactionId = transaction._id;
@@ -116,11 +109,10 @@ router.post('/send', async (req, res) => {
         message: badgeGift.message,
         pointsCost: badgeGift.pointsCost,
         sentAt: badgeGift.sentAt,
-        occasion: badgeGift.metadata.occasion
+        occasion: badgeGift.metadata.occasion,
       },
-      senderPoints: fromUser.points
+      senderPoints: fromUser.points,
     });
-
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -157,7 +149,7 @@ router.get('/received/:userId', async (req, res) => {
       occasion: gift.metadata.occasion,
       isAnonymous: gift.metadata.isAnonymous,
       sentAt: gift.sentAt,
-      status: gift.status
+      status: gift.status,
     }));
 
     res.json({
@@ -166,10 +158,9 @@ router.get('/received/:userId', async (req, res) => {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
-
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -205,7 +196,7 @@ router.get('/sent/:userId', async (req, res) => {
       pointsCost: gift.pointsCost,
       occasion: gift.metadata.occasion,
       sentAt: gift.sentAt,
-      status: gift.status
+      status: gift.status,
     }));
 
     res.json({
@@ -214,10 +205,9 @@ router.get('/sent/:userId', async (req, res) => {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
-
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -231,9 +221,9 @@ router.get('/stats', async (req, res) => {
       {
         $group: {
           _id: null,
-          totalPoints: { $sum: '$pointsCost' }
-        }
-      }
+          totalPoints: { $sum: '$pointsCost' },
+        },
+      },
     ]);
 
     const topGifters = await BadgeGift.aggregate([
@@ -241,95 +231,95 @@ router.get('/stats', async (req, res) => {
         $group: {
           _id: '$fromUserId',
           giftsGiven: { $sum: 1 },
-          pointsSpent: { $sum: '$pointsCost' }
-        }
+          pointsSpent: { $sum: '$pointsCost' },
+        },
       },
       {
         $lookup: {
           from: 'users',
           localField: '_id',
           foreignField: '_id',
-          as: 'user'
-        }
+          as: 'user',
+        },
       },
       {
-        $unwind: '$user'
+        $unwind: '$user',
       },
       {
         $project: {
           user: {
             username: '$user.username',
-            profilePic: '$user.profilePic'
+            profilePic: '$user.profilePic',
           },
           giftsGiven: 1,
-          pointsSpent: 1
-        }
+          pointsSpent: 1,
+        },
       },
       {
-        $sort: { giftsGiven: -1 }
+        $sort: { giftsGiven: -1 },
       },
       {
-        $limit: 10
-      }
+        $limit: 10,
+      },
     ]);
 
     const topReceivers = await BadgeGift.aggregate([
       {
         $group: {
           _id: '$toUserId',
-          giftsReceived: { $sum: 1 }
-        }
+          giftsReceived: { $sum: 1 },
+        },
       },
       {
         $lookup: {
           from: 'users',
           localField: '_id',
           foreignField: '_id',
-          as: 'user'
-        }
+          as: 'user',
+        },
       },
       {
-        $unwind: '$user'
+        $unwind: '$user',
       },
       {
         $project: {
           user: {
             username: '$user.username',
-            profilePic: '$user.profilePic'
+            profilePic: '$user.profilePic',
           },
-          giftsReceived: 1
-        }
+          giftsReceived: 1,
+        },
       },
       {
-        $sort: { giftsReceived: -1 }
+        $sort: { giftsReceived: -1 },
       },
       {
-        $limit: 10
-      }
+        $limit: 10,
+      },
     ]);
 
     const occasionStats = await BadgeGift.aggregate([
       {
         $group: {
           _id: '$metadata.occasion',
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
       {
-        $sort: { count: -1 }
-      }
+        $sort: { count: -1 },
+      },
     ]);
 
     res.json({
       totalGifts,
       totalPointsSpent: totalPointsSpent[0]?.totalPoints || 0,
-      averagePointsPerGift: totalGifts > 0 ? Math.round((totalPointsSpent[0]?.totalPoints || 0) / totalGifts) : 0,
+      averagePointsPerGift:
+        totalGifts > 0 ? Math.round((totalPointsSpent[0]?.totalPoints || 0) / totalGifts) : 0,
       topGifters,
       topReceivers,
       occasionStats,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
-
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -339,10 +329,12 @@ router.get('/stats', async (req, res) => {
 router.get('/available/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    
-    const user = await User.findById(userId)
-      .populate('badges.badgeId', 'name icon description cost');
-    
+
+    const user = await User.findById(userId).populate(
+      'badges.badgeId',
+      'name icon description cost'
+    );
+
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -356,14 +348,13 @@ router.get('/available/:userId', async (req, res) => {
         icon: badge.badgeId.icon,
         description: badge.badgeId.description,
         ownedCount: badge.count,
-        suggestedPointCost: Math.max(30, Math.min(70, Math.floor(badge.badgeId.cost * 0.5)))
+        suggestedPointCost: Math.max(30, Math.min(70, Math.floor(badge.badgeId.cost * 0.5))),
       }));
 
     res.json({
       giftableBadges,
-      userPoints: user.points
+      userPoints: user.points,
     });
-
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

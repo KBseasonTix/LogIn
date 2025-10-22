@@ -36,7 +36,7 @@ const consoleFormat = winston.format.combine(
   winston.format.colorize({ all: true }),
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}${info.stack ? '\n' + info.stack : ''}`
+    info => `${info.timestamp} ${info.level}: ${info.message}${info.stack ? '\n' + info.stack : ''}`
   )
 );
 
@@ -86,7 +86,7 @@ const logger = winston.createLogger({
 
 // Create a stream object for Morgan (HTTP request logger)
 logger.stream = {
-  write: (message) => {
+  write: message => {
     logger.http(message.trim());
   },
 };
@@ -124,7 +124,7 @@ logger.logSecurity = (event, req, meta = {}) => {
 
 // Suppress logs in test environment
 if (process.env.NODE_ENV === 'test') {
-  logger.transports.forEach((t) => (t.silent = true));
+  logger.transports.forEach(t => (t.silent = true));
 }
 
 module.exports = logger;

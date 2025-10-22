@@ -12,14 +12,14 @@ module.exports = [
     type: 'streak',
     requirements: {
       type: 'streak_days',
-      value: 7
+      value: 7,
     },
     rewards: {
-      points: 100
+      points: 100,
     },
     tier: 'bronze',
     isActive: true,
-    order: 1
+    order: 1,
   },
   {
     id: 'streak_30_days',
@@ -30,14 +30,14 @@ module.exports = [
     type: 'streak',
     requirements: {
       type: 'streak_days',
-      value: 30
+      value: 30,
     },
     rewards: {
-      points: 500
+      points: 500,
     },
     tier: 'silver',
     isActive: true,
-    order: 2
+    order: 2,
   },
   {
     id: 'streak_100_days',
@@ -48,14 +48,14 @@ module.exports = [
     type: 'streak',
     requirements: {
       type: 'streak_days',
-      value: 100
+      value: 100,
     },
     rewards: {
-      points: 2000
+      points: 2000,
     },
     tier: 'platinum',
     isActive: true,
-    order: 3
+    order: 3,
   },
 
   // Goal Progress Achievements
@@ -68,16 +68,16 @@ module.exports = [
     type: 'goal',
     requirements: {
       type: 'goal_completion_percentage',
-      value: 25
+      value: 25,
     },
     rewards: {
-      points: 50
+      points: 50,
     },
     tier: 'bronze',
     isActive: true,
     isRepeatable: true,
     maxCompletions: 10,
-    order: 1
+    order: 1,
   },
   {
     id: 'goal_silver',
@@ -88,16 +88,16 @@ module.exports = [
     type: 'goal',
     requirements: {
       type: 'goal_completion_percentage',
-      value: 50
+      value: 50,
     },
     rewards: {
-      points: 100
+      points: 100,
     },
     tier: 'silver',
     isActive: true,
     isRepeatable: true,
     maxCompletions: 10,
-    order: 2
+    order: 2,
   },
   {
     id: 'goal_gold',
@@ -108,16 +108,16 @@ module.exports = [
     type: 'goal',
     requirements: {
       type: 'goal_completion_percentage',
-      value: 75
+      value: 75,
     },
     rewards: {
-      points: 200
+      points: 200,
     },
     tier: 'gold',
     isActive: true,
     isRepeatable: true,
     maxCompletions: 10,
-    order: 3
+    order: 3,
   },
   {
     id: 'goal_platinum',
@@ -128,16 +128,16 @@ module.exports = [
     type: 'goal',
     requirements: {
       type: 'goal_completion_percentage',
-      value: 100
+      value: 100,
     },
     rewards: {
-      points: 500
+      points: 500,
     },
     tier: 'platinum',
     isActive: true,
     isRepeatable: true,
     maxCompletions: 50,
-    order: 4
+    order: 4,
   },
 
   // Community Engagement Achievements
@@ -150,14 +150,14 @@ module.exports = [
     type: 'community',
     requirements: {
       type: 'reactions_given',
-      value: 50
+      value: 50,
     },
     rewards: {
-      points: 150
+      points: 150,
     },
     tier: 'bronze',
     isActive: true,
-    order: 1
+    order: 1,
   },
   {
     id: 'helper_reactions_pro',
@@ -168,14 +168,14 @@ module.exports = [
     type: 'community',
     requirements: {
       type: 'reactions_given',
-      value: 200
+      value: 200,
     },
     rewards: {
-      points: 300
+      points: 300,
     },
     tier: 'silver',
     isActive: true,
-    order: 2
+    order: 2,
   },
   {
     id: 'popular_posts',
@@ -186,14 +186,14 @@ module.exports = [
     type: 'community',
     requirements: {
       type: 'reactions_received',
-      value: 100
+      value: 100,
     },
     rewards: {
-      points: 250
+      points: 250,
     },
     tier: 'gold',
     isActive: true,
-    order: 3
+    order: 3,
   },
 
   // Special Achievements
@@ -206,14 +206,14 @@ module.exports = [
     type: 'special',
     requirements: {
       type: 'posts_count',
-      value: 1
+      value: 1,
     },
     rewards: {
-      points: 25
+      points: 25,
     },
     tier: 'bronze',
     isActive: true,
-    order: 1
+    order: 1,
   },
   {
     id: 'prolific_poster',
@@ -224,14 +224,14 @@ module.exports = [
     type: 'special',
     requirements: {
       type: 'posts_count',
-      value: 100
+      value: 100,
     },
     rewards: {
-      points: 300
+      points: 300,
     },
     tier: 'silver',
     isActive: true,
-    order: 2
+    order: 2,
   },
   {
     id: 'super_poster',
@@ -242,13 +242,13 @@ module.exports = [
     type: 'special',
     requirements: {
       type: 'posts_count',
-      value: 500
+      value: 500,
     },
     rewards: {
-      points: 1000
+      points: 1000,
     },
     tier: 'gold',
     isActive: true,
-    order: 3
-  }
+    order: 3,
+  },
 ];

@@ -4,48 +4,50 @@ const postSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   communityId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Community',
-    required: true
+    required: true,
   },
   content: {
     type: String,
     required: true,
-    maxlength: 20
+    maxlength: 20,
   },
   picture: {
     type: String,
-    default: null
+    default: null,
   },
   positiveMarkers: {
     type: Number,
-    default: 0
+    default: 0,
   },
   negativeMarkers: {
     type: Number,
-    default: 0
+    default: 0,
   },
-  markedBy: [{
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+  markedBy: [
+    {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      type: {
+        type: String,
+        enum: ['positive', 'negative'],
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
     },
-    type: {
-      type: String,
-      enum: ['positive', 'negative']
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
+  ],
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model('Post', postSchema);

@@ -4,38 +4,38 @@ const transactionSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   type: {
     type: String,
     enum: ['redeem', 'deduct', 'award', 'gift_sent', 'gift_received', 'achievement_bonus'],
-    required: true
+    required: true,
   },
   amount: {
     type: Number,
-    required: true
+    required: true,
   },
   reason: String,
   badgeId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Badge'
+    ref: 'Badge',
   },
   achievementId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Achievement'
+    ref: 'Achievement',
   },
   relatedUserId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
   },
   badgeGiftId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'BadgeGift'
+    ref: 'BadgeGift',
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model('Transaction', transactionSchema);

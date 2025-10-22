@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
  * @param {Function} operation - Async function to execute within transaction
  * @returns {Promise<any>} - Result of the operation
  */
-const withTransaction = async (operation) => {
+const withTransaction = async operation => {
   // Skip transactions in test mode or if not using replica set
   if (process.env.NODE_ENV === 'test' || !mongoose.connection.db) {
     // Execute without transaction
@@ -54,7 +54,7 @@ const withTransactionRetry = async (operation, maxRetries = 3) => {
       const isTransient =
         error.errorLabels?.includes('TransientTransactionError') ||
         error.code === 112 || // WriteConflict
-        error.code === 251;   // NoSuchTransaction
+        error.code === 251; // NoSuchTransaction
 
       if (!isTransient || attempt === maxRetries) {
         throw error;
@@ -70,5 +70,5 @@ const withTransactionRetry = async (operation, maxRetries = 3) => {
 
 module.exports = {
   withTransaction,
-  withTransactionRetry
+  withTransactionRetry,
 };

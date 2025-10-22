@@ -6,7 +6,11 @@ const Post = require('../models/Post');
 const User = require('../models/User');
 const Community = require('../models/Community');
 const { connect, disconnect, clearDatabase } = require('./helpers/testDb');
-const { createAuthenticatedUser, createTestCommunity, createTestPost } = require('./helpers/testHelpers');
+const {
+  createAuthenticatedUser,
+  createTestCommunity,
+  createTestPost,
+} = require('./helpers/testHelpers');
 const { POINTS } = require('../config/constants');
 
 beforeAll(async () => {
@@ -25,7 +29,7 @@ describe('POST /api/posts', () => {
   it('should create a post in a community the user has joined', async () => {
     const { user, token } = await createAuthenticatedUser();
     const community = await createTestCommunity(Community, {
-      members: [user._id]
+      members: [user._id],
     });
 
     user.joinedCommunities.push(community._id);
@@ -39,7 +43,7 @@ describe('POST /api/posts', () => {
       .send({
         communityId: community._id.toString(),
         content: 'Test post',
-        timezone: 'America/New_York'
+        timezone: 'America/New_York',
       })
       .expect(201);
 
@@ -67,7 +71,7 @@ describe('POST /api/posts', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         communityId: community._id.toString(),
-        content: 'Test post'
+        content: 'Test post',
       })
       .expect(403);
 
@@ -77,7 +81,7 @@ describe('POST /api/posts', () => {
   it('should reject post with content exceeding max length', async () => {
     const { user, token } = await createAuthenticatedUser();
     const community = await createTestCommunity(Community, {
-      members: [user._id]
+      members: [user._id],
     });
 
     user.joinedCommunities.push(community._id);
@@ -88,7 +92,7 @@ describe('POST /api/posts', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         communityId: community._id.toString(),
-        content: 'This is a very long post that exceeds twenty characters'
+        content: 'This is a very long post that exceeds twenty characters',
       })
       .expect(400);
 
@@ -102,7 +106,7 @@ describe('POST /api/posts', () => {
       .post('/api/posts')
       .send({
         communityId: community._id.toString(),
-        content: 'Test post'
+        content: 'Test post',
       })
       .expect(401);
   });
@@ -157,10 +161,10 @@ describe('GET /api/posts', () => {
 
   it('should filter posts by user', async () => {
     const { user: user1, token } = await createAuthenticatedUser({
-      email: 'user1@example.com'
+      email: 'user1@example.com',
     });
     const { user: user2 } = await createAuthenticatedUser({
-      email: 'user2@example.com'
+      email: 'user2@example.com',
     });
     const community = await createTestCommunity(Community);
 
@@ -177,19 +181,17 @@ describe('GET /api/posts', () => {
   });
 
   it('should require authentication', async () => {
-    await request(app)
-      .get('/api/posts')
-      .expect(401);
+    await request(app).get('/api/posts').expect(401);
   });
 });
 
 describe('POST /api/posts/:id/mark', () => {
   it('should add positive marker to post', async () => {
     const { user: postOwner } = await createAuthenticatedUser({
-      email: 'owner@example.com'
+      email: 'owner@example.com',
     });
     const { token: reactorToken } = await createAuthenticatedUser({
-      email: 'reactor@example.com'
+      email: 'reactor@example.com',
     });
     const community = await createTestCommunity(Community);
     const post = await createTestPost(Post, postOwner._id, community._id);
@@ -210,10 +212,10 @@ describe('POST /api/posts/:id/mark', () => {
 
   it('should add negative marker to post', async () => {
     const { user: postOwner } = await createAuthenticatedUser({
-      email: 'owner@example.com'
+      email: 'owner@example.com',
     });
     const { token: reactorToken } = await createAuthenticatedUser({
-      email: 'reactor@example.com'
+      email: 'reactor@example.com',
     });
     const community = await createTestCommunity(Community);
     const post = await createTestPost(Post, postOwner._id, community._id);
@@ -230,10 +232,10 @@ describe('POST /api/posts/:id/mark', () => {
   it('should award points to post owner for positive marker', async () => {
     const { user: postOwner } = await createAuthenticatedUser({
       email: 'owner@example.com',
-      points: 100
+      points: 100,
     });
     const { user: reactor, token: reactorToken } = await createAuthenticatedUser({
-      email: 'reactor@example.com'
+      email: 'reactor@example.com',
     });
     const community = await createTestCommunity(Community);
     const post = await createTestPost(Post, postOwner._id, community._id);
@@ -302,10 +304,7 @@ describe('POST /api/posts/:id/mark', () => {
     const community = await createTestCommunity(Community);
     const post = await createTestPost(Post, user._id, community._id);
 
-    await request(app)
-      .post(`/api/posts/${post._id}/mark`)
-      .send({ type: 'positive' })
-      .expect(401);
+    await request(app).post(`/api/posts/${post._id}/mark`).send({ type: 'positive' }).expect(401);
   });
 });
 
@@ -327,10 +326,10 @@ describe('DELETE /api/posts/:id', () => {
 
   it('should prevent non-owner from deleting post', async () => {
     const { user: owner } = await createAuthenticatedUser({
-      email: 'owner@example.com'
+      email: 'owner@example.com',
     });
     const { token: otherToken } = await createAuthenticatedUser({
-      email: 'other@example.com'
+      email: 'other@example.com',
     });
     const community = await createTestCommunity(Community);
     const post = await createTestPost(Post, owner._id, community._id);
@@ -364,8 +363,6 @@ describe('DELETE /api/posts/:id', () => {
     const community = await createTestCommunity(Community);
     const post = await createTestPost(Post, user._id, community._id);
 
-    await request(app)
-      .delete(`/api/posts/${post._id}`)
-      .expect(401);
+    await request(app).delete(`/api/posts/${post._id}`).expect(401);
   });
 });

@@ -28,13 +28,10 @@ describe('POST /api/auth/register', () => {
     const userData = {
       username: 'newuser',
       email: 'newuser@example.com',
-      password: 'Test1234'
+      password: 'Test1234',
     };
 
-    const response = await request(app)
-      .post('/api/auth/register')
-      .send(userData)
-      .expect(201);
+    const response = await request(app).post('/api/auth/register').send(userData).expect(201);
 
     expect(response.body).toHaveProperty('token');
     expect(response.body).toHaveProperty('user');
@@ -57,13 +54,10 @@ describe('POST /api/auth/register', () => {
     const userData = {
       username: 'weakuser',
       email: 'weak@example.com',
-      password: 'weak'
+      password: 'weak',
     };
 
-    const response = await request(app)
-      .post('/api/auth/register')
-      .send(userData)
-      .expect(400);
+    const response = await request(app).post('/api/auth/register').send(userData).expect(400);
 
     expect(response.body).toHaveProperty('errors');
     expect(response.body.message).toBe('Validation failed');
@@ -73,13 +67,10 @@ describe('POST /api/auth/register', () => {
     const userData = {
       username: 'testuser',
       email: 'not-an-email',
-      password: 'Test1234'
+      password: 'Test1234',
     };
 
-    const response = await request(app)
-      .post('/api/auth/register')
-      .send(userData)
-      .expect(400);
+    const response = await request(app).post('/api/auth/register').send(userData).expect(400);
 
     expect(response.body).toHaveProperty('errors');
   });
@@ -88,14 +79,11 @@ describe('POST /api/auth/register', () => {
     const userData = {
       username: 'user1',
       email: 'duplicate@example.com',
-      password: 'Test1234'
+      password: 'Test1234',
     };
 
     // Register first user
-    await request(app)
-      .post('/api/auth/register')
-      .send(userData)
-      .expect(201);
+    await request(app).post('/api/auth/register').send(userData).expect(201);
 
     // Try to register with same email
     const response = await request(app)
@@ -110,14 +98,11 @@ describe('POST /api/auth/register', () => {
     const userData = {
       username: 'duplicateuser',
       email: 'email1@example.com',
-      password: 'Test1234'
+      password: 'Test1234',
     };
 
     // Register first user
-    await request(app)
-      .post('/api/auth/register')
-      .send(userData)
-      .expect(201);
+    await request(app).post('/api/auth/register').send(userData).expect(201);
 
     // Try to register with same username
     const response = await request(app)
@@ -141,13 +126,10 @@ describe('POST /api/auth/register', () => {
     const userData = {
       username: 'jwtuser',
       email: 'jwt@example.com',
-      password: 'Test1234'
+      password: 'Test1234',
     };
 
-    const response = await request(app)
-      .post('/api/auth/register')
-      .send(userData)
-      .expect(201);
+    const response = await request(app).post('/api/auth/register').send(userData).expect(201);
 
     const { token } = response.body;
 
@@ -165,14 +147,14 @@ describe('POST /api/auth/login', () => {
     const plainPassword = 'Test1234';
     await createTestUser({
       email: 'login@example.com',
-      password: plainPassword
+      password: plainPassword,
     });
 
     const response = await request(app)
       .post('/api/auth/login')
       .send({
         email: 'login@example.com',
-        password: plainPassword
+        password: plainPassword,
       })
       .expect(200);
 
@@ -184,14 +166,14 @@ describe('POST /api/auth/login', () => {
   it('should reject login with incorrect password', async () => {
     await createTestUser({
       email: 'user@example.com',
-      password: 'Test1234'
+      password: 'Test1234',
     });
 
     const response = await request(app)
       .post('/api/auth/login')
       .send({
         email: 'user@example.com',
-        password: 'WrongPassword123'
+        password: 'WrongPassword123',
       })
       .expect(401);
 
@@ -203,7 +185,7 @@ describe('POST /api/auth/login', () => {
       .post('/api/auth/login')
       .send({
         email: 'nonexistent@example.com',
-        password: 'Test1234'
+        password: 'Test1234',
       })
       .expect(401);
 
@@ -215,7 +197,7 @@ describe('POST /api/auth/login', () => {
       .post('/api/auth/login')
       .send({
         email: 'not-an-email',
-        password: 'Test1234'
+        password: 'Test1234',
       })
       .expect(400);
 
@@ -225,14 +207,14 @@ describe('POST /api/auth/login', () => {
   it('should return valid JWT token on login', async () => {
     const user = await createTestUser({
       email: 'token@example.com',
-      password: 'Test1234'
+      password: 'Test1234',
     });
 
     const response = await request(app)
       .post('/api/auth/login')
       .send({
         email: 'token@example.com',
-        password: 'Test1234'
+        password: 'Test1234',
       })
       .expect(200);
 
@@ -247,7 +229,7 @@ describe('POST /api/auth/login', () => {
   it('should update lastActive timestamp on login', async () => {
     await createTestUser({
       email: 'active@example.com',
-      password: 'Test1234'
+      password: 'Test1234',
     });
 
     const beforeLogin = new Date();
@@ -256,7 +238,7 @@ describe('POST /api/auth/login', () => {
       .post('/api/auth/login')
       .send({
         email: 'active@example.com',
-        password: 'Test1234'
+        password: 'Test1234',
       })
       .expect(200);
 
@@ -269,7 +251,7 @@ describe('POST /api/auth/login', () => {
 describe('GET /api/auth/verify', () => {
   it('should verify valid JWT token', async () => {
     const user = await createTestUser({
-      email: 'verify@example.com'
+      email: 'verify@example.com',
     });
     const token = getAuthToken(user);
 
@@ -283,9 +265,7 @@ describe('GET /api/auth/verify', () => {
   });
 
   it('should reject request without token', async () => {
-    const response = await request(app)
-      .get('/api/auth/verify')
-      .expect(401);
+    const response = await request(app).get('/api/auth/verify').expect(401);
 
     expect(response.body.message).toContain('No token');
   });
@@ -307,7 +287,7 @@ describe('GET /api/auth/verify', () => {
       {
         id: user._id,
         email: user.email,
-        subscriptionStatus: user.subscriptionStatus
+        subscriptionStatus: user.subscriptionStatus,
       },
       process.env.JWT_SECRET,
       { expiresIn: '-1h' }

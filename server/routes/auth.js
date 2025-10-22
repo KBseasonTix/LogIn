@@ -77,7 +77,7 @@ router.post(
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
-        message: 'User with this email already exists'
+        message: 'User with this email already exists',
       });
     }
 
@@ -85,7 +85,7 @@ router.post(
     const existingUsername = await User.findOne({ username });
     if (existingUsername) {
       return res.status(400).json({
-        message: 'Username is already taken'
+        message: 'Username is already taken',
       });
     }
 
@@ -100,7 +100,7 @@ router.post(
       password: hashedPassword,
       points: 0,
       subscriptionStatus: 'free',
-      joinedCommunities: []
+      joinedCommunities: [],
     });
 
     await user.save();
@@ -111,8 +111,8 @@ router.post(
         email: email,
         name: username,
         metadata: {
-          userId: user._id.toString()
-        }
+          userId: user._id.toString(),
+        },
       });
 
       user.stripeCustomerId = customer.id;
@@ -133,8 +133,8 @@ router.post(
         username: user.username,
         email: user.email,
         points: user.points,
-        subscriptionStatus: user.subscriptionStatus
-      }
+        subscriptionStatus: user.subscriptionStatus,
+      },
     });
   })
 );
@@ -195,7 +195,7 @@ router.post(
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({
-        message: 'Invalid email or password'
+        message: 'Invalid email or password',
       });
     }
 
@@ -203,7 +203,7 @@ router.post(
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({
-        message: 'Invalid email or password'
+        message: 'Invalid email or password',
       });
     }
 
@@ -223,8 +223,8 @@ router.post(
         email: user.email,
         points: user.points,
         subscriptionStatus: user.subscriptionStatus,
-        joinedCommunities: user.joinedCommunities
-      }
+        joinedCommunities: user.joinedCommunities,
+      },
     });
   })
 );
@@ -263,7 +263,7 @@ router.get(
 
     if (!user) {
       return res.status(404).json({
-        message: 'User not found'
+        message: 'User not found',
       });
     }
 
@@ -275,8 +275,8 @@ router.get(
         email: user.email,
         points: user.points,
         subscriptionStatus: user.subscriptionStatus,
-        joinedCommunities: user.joinedCommunities
-      }
+        joinedCommunities: user.joinedCommunities,
+      },
     });
   })
 );

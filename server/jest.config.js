@@ -15,8 +15,8 @@ module.exports = {
       branches: 60,
       functions: 60,
       lines: 60,
-      statements: 60
-    }
+      statements: 60,
+    },
   },
 
   // Files to collect coverage from
@@ -26,14 +26,11 @@ module.exports = {
     'services/**/*.js',
     '!**/__tests__/**',
     '!**/node_modules/**',
-    '!**/coverage/**'
+    '!**/coverage/**',
   ],
 
   // Test match patterns
-  testMatch: [
-    '**/__tests__/**/*.test.js',
-    '**/?(*.)+(spec|test).js'
-  ],
+  testMatch: ['**/__tests__/**/*.test.js', '**/?(*.)+(spec|test).js'],
 
   // Setup files
   setupFilesAfterEnv: ['<rootDir>/__tests__/setup.js'],
@@ -50,5 +47,5 @@ module.exports = {
   // Clear mocks between tests
   clearMocks: true,
   resetMocks: true,
-  restoreMocks: true
+  restoreMocks: true,
 };

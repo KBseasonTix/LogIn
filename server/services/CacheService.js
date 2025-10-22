@@ -6,22 +6,26 @@ class CacheService {
   constructor() {
     this.cache = new Map();
     this.ttlMap = new Map();
-    
+
     // Clean up expired cache entries every 5 minutes
-    setInterval(() => {
-      this.cleanup();
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        this.cleanup();
+      },
+      5 * 60 * 1000
+    );
   }
 
-  set(key, value, ttlSeconds = 300) { // Default 5 minutes TTL
-    const expiresAt = Date.now() + (ttlSeconds * 1000);
+  set(key, value, ttlSeconds = 300) {
+    // Default 5 minutes TTL
+    const expiresAt = Date.now() + ttlSeconds * 1000;
     this.cache.set(key, value);
     this.ttlMap.set(key, expiresAt);
   }
 
   get(key) {
     const expiresAt = this.ttlMap.get(key);
-    
+
     if (expiresAt && Date.now() > expiresAt) {
       // Cache expired
       this.cache.delete(key);
@@ -44,7 +48,7 @@ class CacheService {
 
   cleanup() {
     const now = Date.now();
-    
+
     for (const [key, expiresAt] of this.ttlMap.entries()) {
       if (now > expiresAt) {
         this.cache.delete(key);
@@ -99,7 +103,8 @@ class CacheService {
     this.delete(key);
   }
 
-  cacheAchievementStats(data, ttlSeconds = 600) { // Cache for 10 minutes
+  cacheAchievementStats(data, ttlSeconds = 600) {
+    // Cache for 10 minutes
     const key = 'achievement_stats';
     this.set(key, data, ttlSeconds);
   }
@@ -126,8 +131,8 @@ class CacheService {
   }
 
   invalidateBadgeGifts(userId) {
-    const keys = Array.from(this.cache.keys()).filter(
-      key => key.startsWith(`badge_gifts:${userId}:`)
+    const keys = Array.from(this.cache.keys()).filter(key =>
+      key.startsWith(`badge_gifts:${userId}:`)
     );
     keys.forEach(key => this.delete(key));
   }
@@ -137,22 +142,22 @@ class CacheService {
     return {
       cacheSize: this.cache.size,
       keys: Array.from(this.cache.keys()),
-      memory: this.getMemoryUsage()
+      memory: this.getMemoryUsage(),
     };
   }
 
   getMemoryUsage() {
     let totalSize = 0;
-    
+
     for (const [key, value] of this.cache.entries()) {
       totalSize += JSON.stringify(key).length;
       totalSize += JSON.stringify(value).length;
     }
-    
+
     return {
       bytes: totalSize,
       kb: Math.round(totalSize / 1024),
-      mb: Math.round(totalSize / (1024 * 1024))
+      mb: Math.round(totalSize / (1024 * 1024)),
     };
   }
 }

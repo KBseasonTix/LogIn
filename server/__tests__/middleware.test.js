@@ -27,8 +27,8 @@ describe('Authentication Middleware', () => {
 
       const req = {
         headers: {
-          authorization: `Bearer ${token}`
-        }
+          authorization: `Bearer ${token}`,
+        },
       };
       const res = {};
       const next = jest.fn();
@@ -45,7 +45,7 @@ describe('Authentication Middleware', () => {
       const req = { headers: {} };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       const next = jest.fn();
 
@@ -54,7 +54,7 @@ describe('Authentication Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: expect.stringContaining('No token')
+          message: expect.stringContaining('No token'),
         })
       );
       expect(next).not.toHaveBeenCalled();
@@ -63,12 +63,12 @@ describe('Authentication Middleware', () => {
     it('should reject invalid token', () => {
       const req = {
         headers: {
-          authorization: 'Bearer invalid-token'
-        }
+          authorization: 'Bearer invalid-token',
+        },
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       const next = jest.fn();
 
@@ -77,7 +77,7 @@ describe('Authentication Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: expect.stringContaining('Invalid token')
+          message: expect.stringContaining('Invalid token'),
         })
       );
       expect(next).not.toHaveBeenCalled();
@@ -91,7 +91,7 @@ describe('Authentication Middleware', () => {
         {
           id: user._id.toString(),
           email: user.email,
-          subscriptionStatus: user.subscriptionStatus
+          subscriptionStatus: user.subscriptionStatus,
         },
         process.env.JWT_SECRET,
         { expiresIn: '-1h' }
@@ -99,12 +99,12 @@ describe('Authentication Middleware', () => {
 
       const req = {
         headers: {
-          authorization: `Bearer ${expiredToken}`
-        }
+          authorization: `Bearer ${expiredToken}`,
+        },
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       const next = jest.fn();
 
@@ -113,7 +113,7 @@ describe('Authentication Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: expect.stringContaining('expired')
+          message: expect.stringContaining('expired'),
         })
       );
       expect(next).not.toHaveBeenCalled();
@@ -122,12 +122,12 @@ describe('Authentication Middleware', () => {
     it('should handle malformed authorization header', () => {
       const req = {
         headers: {
-          authorization: 'InvalidFormat'
-        }
+          authorization: 'InvalidFormat',
+        },
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       const next = jest.fn();
 
@@ -167,8 +167,8 @@ describe('Authentication Middleware', () => {
     it('should allow premium users', () => {
       const req = {
         user: {
-          subscriptionStatus: 'premium'
-        }
+          subscriptionStatus: 'premium',
+        },
       };
       const res = {};
       const next = jest.fn();
@@ -181,12 +181,12 @@ describe('Authentication Middleware', () => {
     it('should reject free users', () => {
       const req = {
         user: {
-          subscriptionStatus: 'free'
-        }
+          subscriptionStatus: 'free',
+        },
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       const next = jest.fn();
 
@@ -195,7 +195,7 @@ describe('Authentication Middleware', () => {
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: expect.stringContaining('premium')
+          message: expect.stringContaining('premium'),
         })
       );
       expect(next).not.toHaveBeenCalled();
@@ -212,8 +212,8 @@ describe('Validation Middleware', () => {
         body: {
           username: 'testuser',
           email: 'test@example.com',
-          password: 'Test1234'
-        }
+          password: 'Test1234',
+        },
       };
       const res = {};
       const next = jest.fn();
@@ -230,12 +230,12 @@ describe('Validation Middleware', () => {
         body: {
           username: 'testuser',
           email: 'not-an-email',
-          password: 'Test1234'
-        }
+          password: 'Test1234',
+        },
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       const next = jest.fn();
 
@@ -247,9 +247,9 @@ describe('Validation Middleware', () => {
           message: 'Validation failed',
           errors: expect.arrayContaining([
             expect.objectContaining({
-              field: 'email'
-            })
-          ])
+              field: 'email',
+            }),
+          ]),
         })
       );
       expect(next).not.toHaveBeenCalled();
@@ -262,12 +262,12 @@ describe('Validation Middleware', () => {
         body: {
           username: 'testuser',
           email: 'test@example.com',
-          password: 'weak'
-        }
+          password: 'weak',
+        },
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       const next = jest.fn();
 
@@ -278,9 +278,9 @@ describe('Validation Middleware', () => {
         expect.objectContaining({
           errors: expect.arrayContaining([
             expect.objectContaining({
-              field: 'password'
-            })
-          ])
+              field: 'password',
+            }),
+          ]),
         })
       );
     });
@@ -290,13 +290,13 @@ describe('Validation Middleware', () => {
 
       const req = {
         body: {
-          username: 'testuser'
+          username: 'testuser',
           // Missing email and password
-        }
+        },
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       const next = jest.fn();
 
@@ -306,7 +306,7 @@ describe('Validation Middleware', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Validation failed',
-          errors: expect.any(Array)
+          errors: expect.any(Array),
         })
       );
     });
@@ -318,8 +318,8 @@ describe('Validation Middleware', () => {
         body: {
           email: 'test@example.com',
           password: 'Test1234',
-          unknownField: 'should be removed'
-        }
+          unknownField: 'should be removed',
+        },
       };
       const res = {};
       const next = jest.fn();
@@ -338,8 +338,8 @@ describe('Validation Middleware', () => {
       const req = {
         body: {
           userId: '507f1f77bcf86cd799439011',
-          communityId: '507f1f77bcf86cd799439012'
-        }
+          communityId: '507f1f77bcf86cd799439012',
+        },
       };
       const res = {};
       const next = jest.fn();
@@ -355,12 +355,12 @@ describe('Validation Middleware', () => {
       const req = {
         body: {
           userId: 'invalid-id',
-          communityId: '507f1f77bcf86cd799439012'
-        }
+          communityId: '507f1f77bcf86cd799439012',
+        },
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn()
+        json: jest.fn(),
       };
       const next = jest.fn();
 
@@ -371,9 +371,9 @@ describe('Validation Middleware', () => {
         expect.objectContaining({
           errors: expect.arrayContaining([
             expect.objectContaining({
-              field: 'userId'
-            })
-          ])
+              field: 'userId',
+            }),
+          ]),
         })
       );
     });

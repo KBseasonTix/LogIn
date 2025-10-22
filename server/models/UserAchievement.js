@@ -5,57 +5,57 @@ const userAchievementSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   achievementId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Achievement',
-    required: true
+    required: true,
   },
   progress: {
     current: {
       type: Number,
-      default: 0
+      default: 0,
     },
     target: {
       type: Number,
-      required: true
+      required: true,
     },
     percentage: {
       type: Number,
       default: 0,
       min: 0,
-      max: 100
-    }
+      max: 100,
+    },
   },
   completedAt: {
     type: Date,
-    default: null
+    default: null,
   },
   completionCount: {
     type: Number,
-    default: 0
+    default: 0,
   },
   isCompleted: {
     type: Boolean,
-    default: false
+    default: false,
   },
   notificationSent: {
     type: Boolean,
-    default: false
+    default: false,
   },
   metadata: {
     type: mongoose.Schema.Types.Mixed,
-    default: {}
+    default: {},
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 // Compound index for efficient user achievement lookup
@@ -64,9 +64,12 @@ userAchievementSchema.index({ userId: 1, isCompleted: 1 });
 userAchievementSchema.index({ userId: 1, completedAt: -1 });
 
 // Update percentage whenever progress changes
-userAchievementSchema.pre('save', function(next) {
+userAchievementSchema.pre('save', function (next) {
   if (this.progress.target > 0) {
-    this.progress.percentage = Math.min(100, Math.round((this.progress.current / this.progress.target) * 100));
+    this.progress.percentage = Math.min(
+      100,
+      Math.round((this.progress.current / this.progress.target) * 100)
+    );
   }
   this.updatedAt = new Date();
   next();

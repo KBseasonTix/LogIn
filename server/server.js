@@ -57,7 +57,7 @@ app.use(mongoSanitize()); // Prevent NoSQL injection
 const corsOptions = {
   origin: process.env.CLIENT_URL || '*',
   optionsSuccessStatus: 200,
-  credentials: true
+  credentials: true,
 };
 app.use(cors(corsOptions));
 
@@ -72,18 +72,19 @@ if (process.env.NODE_ENV !== 'test') {
     process.exit(1);
   }
 
-  mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    const dbName = process.env.MONGODB_URI.split('/')[3]?.split('?')[0];
-    logger.info('MongoDB connected successfully', { database: dbName });
-  })
-  .catch(err => {
-    logger.error('MongoDB connection failed', { error: err.message });
-    process.exit(1);
-  });
+  mongoose
+    .connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then(() => {
+      const dbName = process.env.MONGODB_URI.split('/')[3]?.split('?')[0];
+      logger.info('MongoDB connected successfully', { database: dbName });
+    })
+    .catch(err => {
+      logger.error('MongoDB connection failed', { error: err.message });
+      process.exit(1);
+    });
 }
 
 // Models (prefixed with _ as they're loaded for Mongoose registration)
@@ -154,10 +155,14 @@ const analyticsRoutes = require('./routes/analytics');
 
 // Mount routes (health check and docs first, no rate limiting)
 app.use('/health', healthRoutes);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Fitness Tracker API Docs'
-}));
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Fitness Tracker API Docs',
+  })
+);
 app.use('/api/auth', authRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/posts', postRoutes);
@@ -185,7 +190,7 @@ cron.schedule('0 0 * * *', async () => {
 
       const postsToday = await Post.countDocuments({
         userId: user._id,
-        createdAt: { $gte: today }
+        createdAt: { $gte: today },
       });
 
       const minimumPosts = POINTS.MINIMUM_DAILY_POSTS;
@@ -199,7 +204,7 @@ cron.schedule('0 0 * * *', async () => {
           userId: user._id,
           type: 'deduct',
           amount: deduction,
-          reason: 'Missed daily posts'
+          reason: 'Missed daily posts',
         });
         await transaction.save();
       }
@@ -226,7 +231,7 @@ if (process.env.NODE_ENV !== 'test') {
     logger.info('Server started successfully', {
       port: PORT,
       environment: process.env.NODE_ENV || 'development',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   });
 

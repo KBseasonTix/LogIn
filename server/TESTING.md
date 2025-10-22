@@ -88,12 +88,12 @@ Tests use **MongoDB Memory Server** for isolated, in-memory testing:
 
 ## Coverage Goals
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| Branches | 60% | TBD |
-| Functions | 60% | TBD |
-| Lines | 60% | TBD |
-| Statements | 60% | TBD |
+| Metric     | Target | Current |
+| ---------- | ------ | ------- |
+| Branches   | 60%    | TBD     |
+| Functions  | 60%    | TBD     |
+| Lines      | 60%    | TBD     |
+| Statements | 60%    | TBD     |
 
 ## Environment Setup
 
@@ -196,15 +196,19 @@ describe('GET /api/new-route', () => {
 ## Test Helpers
 
 ### `createTestUser(userData)`
+
 Creates a user with hashed password.
 
 ### `createAuthenticatedUser(userData)`
+
 Creates a user and returns `{ user, token }`.
 
 ### `getAuthToken(user)`
+
 Generates JWT token for a user.
 
 ### `seedDatabase()`
+
 Populates database with test communities, badges, and achievements.
 
 ## CI/CD Integration
@@ -241,15 +245,18 @@ jobs:
 ## Troubleshooting
 
 ### Tests Timeout
+
 - Increase timeout in `jest.config.js`: `testTimeout: 30000`
 - Check MongoDB Memory Server download
 
 ### MongoDB Connection Errors
+
 - Ensure MongoDB Memory Server can download binaries
 - Use local MongoDB instance as fallback
 - Check network/firewall settings
 
 ### Import Errors
+
 - Ensure all paths are relative to test file
 - Check that server.js exports `app`
 
@@ -264,6 +271,7 @@ jobs:
 ## Security Testing
 
 Tests verify:
+
 - ✅ Passwords are hashed (not plain text)
 - ✅ JWT tokens are required for protected routes
 - ✅ Input validation prevents injection

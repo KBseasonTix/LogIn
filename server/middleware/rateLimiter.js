@@ -12,7 +12,7 @@ const apiLimiter = rateLimit({
   max: RATE_LIMIT.MAX_REQUESTS,
   message: {
     status: 'error',
-    message: 'Too many requests from this IP, please try again later.'
+    message: 'Too many requests from this IP, please try again later.',
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -28,7 +28,7 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: false,
   message: {
     status: 'error',
-    message: 'Too many login attempts from this IP, please try again after 15 minutes.'
+    message: 'Too many login attempts from this IP, please try again after 15 minutes.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -43,7 +43,7 @@ const postLimiter = rateLimit({
   max: 10, // 10 posts per minute
   message: {
     status: 'error',
-    message: 'You are posting too quickly. Please slow down.'
+    message: 'You are posting too quickly. Please slow down.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -52,5 +52,5 @@ const postLimiter = rateLimit({
 module.exports = {
   apiLimiter,
   authLimiter,
-  postLimiter
+  postLimiter,
 };

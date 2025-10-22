@@ -36,9 +36,7 @@ describe('GET /api/badges', () => {
   });
 
   it('should require authentication', async () => {
-    await request(app)
-      .get('/api/badges')
-      .expect(401);
+    await request(app).get('/api/badges').expect(401);
   });
 });
 
@@ -46,7 +44,7 @@ describe('GET /api/badges/user', () => {
   it('should return user owned badges', async () => {
     const badge = await createTestBadge(Badge);
     const { token } = await createAuthenticatedUser({
-      badges: [{ badgeId: badge._id, count: 2 }]
+      badges: [{ badgeId: badge._id, count: 2 }],
     });
 
     const response = await request(app)
@@ -62,7 +60,7 @@ describe('GET /api/badges/user', () => {
   it('should filter out badges with zero count', async () => {
     const badge = await createTestBadge(Badge);
     const { token } = await createAuthenticatedUser({
-      badges: [{ badgeId: badge._id, count: 0 }]
+      badges: [{ badgeId: badge._id, count: 0 }],
     });
 
     const response = await request(app)
@@ -74,9 +72,7 @@ describe('GET /api/badges/user', () => {
   });
 
   it('should require authentication', async () => {
-    await request(app)
-      .get('/api/badges/user')
-      .expect(401);
+    await request(app).get('/api/badges/user').expect(401);
   });
 });
 
@@ -112,7 +108,7 @@ describe('POST /api/badges/redeem', () => {
     const badge = await createTestBadge(Badge, { cost: 50 });
     const { user, token } = await createAuthenticatedUser({
       points: 200,
-      badges: [{ badgeId: badge._id, count: 1 }]
+      badges: [{ badgeId: badge._id, count: 1 }],
     });
 
     await request(app)
@@ -182,10 +178,10 @@ describe('POST /api/badges/gift', () => {
     const badge = await createTestBadge(Badge);
     const { user: sender, token: senderToken } = await createAuthenticatedUser({
       email: 'sender@example.com',
-      badges: [{ badgeId: badge._id, count: 2 }]
+      badges: [{ badgeId: badge._id, count: 2 }],
     });
     const { user: recipient } = await createAuthenticatedUser({
-      email: 'recipient@example.com'
+      email: 'recipient@example.com',
     });
 
     const response = await request(app)
@@ -194,7 +190,7 @@ describe('POST /api/badges/gift', () => {
       .send({
         recipientId: recipient._id.toString(),
         badgeId: badge._id.toString(),
-        message: 'Great job!'
+        message: 'Great job!',
       })
       .expect(200);
 
@@ -220,10 +216,10 @@ describe('POST /api/badges/gift', () => {
     const badge = await createTestBadge(Badge);
     const { user: sender, token: senderToken } = await createAuthenticatedUser({
       email: 'sender@example.com',
-      badges: [{ badgeId: badge._id, count: 1 }]
+      badges: [{ badgeId: badge._id, count: 1 }],
     });
     const { user: recipient } = await createAuthenticatedUser({
-      email: 'recipient@example.com'
+      email: 'recipient@example.com',
     });
 
     await request(app)
@@ -231,7 +227,7 @@ describe('POST /api/badges/gift', () => {
       .set('Authorization', `Bearer ${senderToken}`)
       .send({
         recipientId: recipient._id.toString(),
-        badgeId: badge._id.toString()
+        badgeId: badge._id.toString(),
       })
       .expect(200);
 
@@ -242,10 +238,10 @@ describe('POST /api/badges/gift', () => {
   it('should prevent gifting badge user does not own', async () => {
     const badge = await createTestBadge(Badge);
     const { token: senderToken } = await createAuthenticatedUser({
-      email: 'sender@example.com'
+      email: 'sender@example.com',
     });
     const { user: recipient } = await createAuthenticatedUser({
-      email: 'recipient@example.com'
+      email: 'recipient@example.com',
     });
 
     const response = await request(app)
@@ -253,17 +249,17 @@ describe('POST /api/badges/gift', () => {
       .set('Authorization', `Bearer ${senderToken}`)
       .send({
         recipientId: recipient._id.toString(),
-        badgeId: badge._id.toString()
+        badgeId: badge._id.toString(),
       })
       .expect(400);
 
-    expect(response.body.message).toContain('don\'t have this badge');
+    expect(response.body.message).toContain("don't have this badge");
   });
 
   it('should prevent self-gifting', async () => {
     const badge = await createTestBadge(Badge);
     const { user, token } = await createAuthenticatedUser({
-      badges: [{ badgeId: badge._id, count: 1 }]
+      badges: [{ badgeId: badge._id, count: 1 }],
     });
 
     const response = await request(app)
@@ -271,7 +267,7 @@ describe('POST /api/badges/gift', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         recipientId: user._id.toString(),
-        badgeId: badge._id.toString()
+        badgeId: badge._id.toString(),
       })
       .expect(400);
 
@@ -281,7 +277,7 @@ describe('POST /api/badges/gift', () => {
   it('should return 404 for non-existent recipient', async () => {
     const badge = await createTestBadge(Badge);
     const { token } = await createAuthenticatedUser({
-      badges: [{ badgeId: badge._id, count: 1 }]
+      badges: [{ badgeId: badge._id, count: 1 }],
     });
     const fakeId = '507f1f77bcf86cd799439011';
 
@@ -290,7 +286,7 @@ describe('POST /api/badges/gift', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({
         recipientId: fakeId,
-        badgeId: badge._id.toString()
+        badgeId: badge._id.toString(),
       })
       .expect(404);
 
@@ -305,7 +301,7 @@ describe('POST /api/badges/gift', () => {
       .post('/api/badges/gift')
       .send({
         recipientId: user._id.toString(),
-        badgeId: badge._id.toString()
+        badgeId: badge._id.toString(),
       })
       .expect(401);
   });

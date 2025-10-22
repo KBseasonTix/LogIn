@@ -44,7 +44,7 @@ router.get(
     res.json({
       success: true,
       count: posts.length,
-      data: posts
+      data: posts,
     });
   })
 );
@@ -80,7 +80,7 @@ router.post(
       content,
       picture,
       positiveMarkers: 0,
-      negativeMarkers: 0
+      negativeMarkers: 0,
     });
 
     await post.save();
@@ -97,7 +97,7 @@ router.post(
       streakResult = await StreakService.updateUserStreak(userId, timezone);
       await AchievementEngine.checkAndAwardAchievements(userId, 'post_created', {
         totalPosts: user.totalPosts,
-        streakResult
+        streakResult,
       });
     } catch (error) {
       console.error('Streak/Achievement update failed:', error.message);
@@ -107,7 +107,7 @@ router.post(
     // Populate post data for response
     await post.populate([
       { path: 'userId', select: 'username points' },
-      { path: 'communityId', select: 'name' }
+      { path: 'communityId', select: 'name' },
     ]);
 
     res.status(201).json({
@@ -116,8 +116,8 @@ router.post(
       data: {
         post,
         points: user.points,
-        streak: streakResult
-      }
+        streak: streakResult,
+      },
     });
   })
 );
@@ -156,10 +156,10 @@ router.post(
     if (type === MARKER_TYPES.POSITIVE && post.userId.toString() !== userId) {
       try {
         // Use transaction to ensure atomicity of multi-user update
-        await withTransaction(async (session) => {
+        await withTransaction(async session => {
           const [postOwner, reactor] = await Promise.all([
             User.findById(post.userId).session(session),
-            User.findById(userId).session(session)
+            User.findById(userId).session(session),
           ]);
 
           if (postOwner && reactor) {
@@ -178,11 +178,11 @@ router.post(
             setImmediate(() => {
               Promise.all([
                 AchievementEngine.checkAndAwardAchievements(postOwner._id, 'reaction_received', {
-                  totalReactionsReceived: postOwner.totalReactionsReceived
+                  totalReactionsReceived: postOwner.totalReactionsReceived,
                 }),
                 AchievementEngine.checkAndAwardAchievements(reactor._id, 'reaction_given', {
-                  totalReactionsGiven: reactor.totalReactionsGiven
-                })
+                  totalReactionsGiven: reactor.totalReactionsGiven,
+                }),
               ]).catch(err => console.error('Achievement update failed:', err.message));
             });
           }
@@ -198,8 +198,8 @@ router.post(
       message: 'Marker updated successfully',
       data: {
         positiveMarkers: post.positiveMarkers,
-        negativeMarkers: post.negativeMarkers
-      }
+        negativeMarkers: post.negativeMarkers,
+      },
     });
   })
 );
@@ -231,7 +231,7 @@ router.delete(
 
     res.json({
       success: true,
-      message: 'Post deleted successfully'
+      message: 'Post deleted successfully',
     });
   })
 );

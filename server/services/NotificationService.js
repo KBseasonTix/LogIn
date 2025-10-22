@@ -12,7 +12,7 @@ class NotificationService {
       // - Send push notifications
       // - Send email notifications
       // - Emit socket events for real-time updates
-      
+
       return notification;
     } catch (error) {
       console.error('Error creating notification:', error);
@@ -74,7 +74,7 @@ class NotificationService {
     try {
       const count = await Notification.countDocuments({
         userId,
-        isRead: false
+        isRead: false,
       });
 
       return count;
@@ -91,7 +91,7 @@ class NotificationService {
 
       const result = await Notification.deleteMany({
         createdAt: { $lt: cutoffDate },
-        isRead: true
+        isRead: true,
       });
 
       console.log(`Deleted ${result.deletedCount} old notifications`);
@@ -105,7 +105,7 @@ class NotificationService {
   async createBadgeGiftNotification(badgeGift) {
     try {
       const fromUser = await User.findById(badgeGift.fromUserId).select('username');
-      const message = badgeGift.metadata.isAnonymous 
+      const message = badgeGift.metadata.isAnonymous
         ? `Someone sent you a badge with a message: "${badgeGift.message}"`
         : `${fromUser.username} sent you a badge with a message: "${badgeGift.message}"`;
 
@@ -117,9 +117,9 @@ class NotificationService {
         data: {
           badgeId: badgeGift.badgeId,
           badgeGiftId: badgeGift._id,
-          fromUserId: badgeGift.metadata.isAnonymous ? null : badgeGift.fromUserId
+          fromUserId: badgeGift.metadata.isAnonymous ? null : badgeGift.fromUserId,
         },
-        priority: 'normal'
+        priority: 'normal',
       });
     } catch (error) {
       console.error('Error creating badge gift notification:', error);
@@ -146,9 +146,9 @@ class NotificationService {
         title,
         message,
         data: {
-          streakDays
+          streakDays,
         },
-        priority: streakDays >= 30 ? 'high' : 'normal'
+        priority: streakDays >= 30 ? 'high' : 'normal',
       });
     } catch (error) {
       console.error('Error creating streak milestone notification:', error);
@@ -175,9 +175,9 @@ class NotificationService {
         title,
         message,
         data: {
-          goalProgress
+          goalProgress,
         },
-        priority: goalProgress >= 100 ? 'high' : 'normal'
+        priority: goalProgress >= 100 ? 'high' : 'normal',
       });
     } catch (error) {
       console.error('Error creating goal progress notification:', error);

@@ -13,7 +13,7 @@ const Post = require('../models/Post');
 router.get('/achievements/engagement', async (req, res) => {
   try {
     const { period } = req.query; // 'day', 'week', 'month', 'year'
-    
+
     const dateRange = new Date();
     switch (period) {
       case 'day':
@@ -36,79 +36,79 @@ router.get('/achievements/engagement', async (req, res) => {
     const totalAchievements = await Achievement.countDocuments({ isActive: true });
     const completedInPeriod = await UserAchievement.countDocuments({
       completedAt: { $gte: dateRange },
-      isCompleted: true
+      isCompleted: true,
     });
 
     // Most popular achievements
     const popularAchievements = await UserAchievement.aggregate([
       {
-        $match: { 
+        $match: {
           completedAt: { $gte: dateRange },
-          isCompleted: true
-        }
+          isCompleted: true,
+        },
       },
       {
         $group: {
           _id: '$achievementId',
           completionCount: { $sum: 1 },
-          uniqueUsers: { $addToSet: '$userId' }
-        }
+          uniqueUsers: { $addToSet: '$userId' },
+        },
       },
       {
         $lookup: {
           from: 'achievements',
           localField: '_id',
           foreignField: '_id',
-          as: 'achievement'
-        }
+          as: 'achievement',
+        },
       },
       {
-        $unwind: '$achievement'
+        $unwind: '$achievement',
       },
       {
         $project: {
           achievement: '$achievement',
           completionCount: 1,
-          uniqueUserCount: { $size: '$uniqueUsers' }
-        }
+          uniqueUserCount: { $size: '$uniqueUsers' },
+        },
       },
       {
-        $sort: { completionCount: -1 }
+        $sort: { completionCount: -1 },
       },
       {
-        $limit: 10
-      }
+        $limit: 10,
+      },
     ]);
 
     // Achievement categories performance
     const categoryPerformance = await UserAchievement.aggregate([
       {
-        $match: { 
+        $match: {
           completedAt: { $gte: dateRange },
-          isCompleted: true
-        }
+          isCompleted: true,
+        },
       },
       {
         $lookup: {
           from: 'achievements',
           localField: 'achievementId',
           foreignField: '_id',
-          as: 'achievement'
-        }
+          as: 'achievement',
+        },
       },
       {
-        $unwind: '$achievement'
+        $unwind: '$achievement',
       },
       {
         $group: {
           _id: '$achievement.category',
           completions: { $sum: 1 },
-          averageProgress: { $avg: '$progress.percentage' }
-        }
+          averageProgress: { $avg: '$progress.percentage' },
+        },
       },
       {
-        $sort: { completions: -1 }
-      }
+        $sort: { completions: -1 },
+      },
     ]);
 
     // User engagement levels
@@ -117,28 +117,43 @@ router.get('/achievements/engagement', async (req, res) => {
         $group: {
           _id: '$userId',
           totalAchievements: { $sum: { $cond: ['$isCompleted', 1, 0] } },
-          inProgressAchievements: { $sum: { $cond: ['$isCompleted', 0, 1] } }
-        }
+          inProgressAchievements: { $sum: { $cond: ['$isCompleted', 0, 1] } },
+        },
       },
       {
         $group: {
           _id: null,
           highlyEngaged: { $sum: { $cond: [{ $gte: ['$totalAchievements', 10] }, 1, 0] } },
-          moderatelyEngaged: { $sum: { $cond: [{ $and: [{ $gte: ['$totalAchievements', 3] }, { $lt: ['$totalAchievements', 10] }] }, 1, 0] } },
-          lowEngaged: { $sum: { $cond: [{ $lt: ['$totalAchievements', 3] }, 1, 0] } }
-        }
-      }
+          moderatelyEngaged: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [{ $gte: ['$totalAchievements', 3] }, { $lt: ['$totalAchievements', 10] }],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          lowEngaged: { $sum: { $cond: [{ $lt: ['$totalAchievements', 3] }, 1, 0] } },
+        },
+      },
     ]);
 
     res.json({
       period,
       totalAchievements,
       completedInPeriod,
-      completionRate: totalAchievements > 0 ? Math.round((completedInPeriod / totalAchievements) * 100) : 0,
+      completionRate:
+        totalAchievements > 0 ? Math.round((completedInPeriod / totalAchievements) * 100) : 0,
       popularAchievements,
       categoryPerformance,
-      userEngagement: userEngagement[0] || { highlyEngaged: 0, moderatelyEngaged: 0, lowEngaged: 0 },
-      timestamp: new Date()
+      userEngagement: userEngagement[0] || {
+        highlyEngaged: 0,
+        moderatelyEngaged: 0,
+        lowEngaged: 0,
+      },
+      timestamp: new Date(),
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -157,54 +172,48 @@ router.get('/retention', async (req, res) => {
           _id: {
             userId: '$userId',
             week: { $week: '$createdAt' },
-            year: { $year: '$createdAt' }
+            year: { $year: '$createdAt' },
           },
           firstAchievement: { $min: '$createdAt' },
-          lastActivity: { $max: '$updatedAt' }
-        }
+          lastActivity: { $max: '$updatedAt' },
+        },
       },
       {
         $group: {
           _id: {
             week: '$_id.week',
-            year: '$_id.year'
+            year: '$_id.year',
           },
           newUsers: { $sum: 1 },
-          activeUsers: { 
-            $sum: { 
+          activeUsers: {
+            $sum: {
               $cond: [
-                { 
-                  $gte: [
-                    '$lastActivity', 
-                    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-                  ] 
-                }, 
-                1, 
-                0
-              ] 
-            }
-          }
-        }
+                {
+                  $gte: ['$lastActivity', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+        },
       },
       {
         $project: {
           period: { $concat: [{ $toString: '$_id.year' }, '-W', { $toString: '$_id.week' }] },
           newUsers: 1,
           activeUsers: 1,
-          retentionRate: { 
-            $round: [
-              { $multiply: [{ $divide: ['$activeUsers', '$newUsers'] }, 100] }, 
-              2
-            ]
-          }
-        }
+          retentionRate: {
+            $round: [{ $multiply: [{ $divide: ['$activeUsers', '$newUsers'] }, 100] }, 2],
+          },
+        },
       },
       {
-        $sort: { '_id.year': -1, '_id.week': -1 }
+        $sort: { '_id.year': -1, '_id.week': -1 },
       },
       {
-        $limit: 12
-      }
+        $limit: 12,
+      },
     ]);
 
     // Achievement-driven retention
@@ -215,9 +224,9 @@ router.get('/retention', async (req, res) => {
           createdAt: 1,
           lastActive: 1,
           isRecentlyActive: {
-            $gte: ['$lastActive', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)]
-          }
-        }
+            $gte: ['$lastActive', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)],
+          },
+        },
       },
       {
         $group: {
@@ -227,34 +236,31 @@ router.get('/retention', async (req, res) => {
                 { case: { $eq: ['$totalAchievements', 0] }, then: 'no_achievements' },
                 { case: { $lte: ['$totalAchievements', 3] }, then: 'low_achievers' },
                 { case: { $lte: ['$totalAchievements', 10] }, then: 'moderate_achievers' },
-                { case: { $gt: ['$totalAchievements', 10] }, then: 'high_achievers' }
+                { case: { $gt: ['$totalAchievements', 10] }, then: 'high_achievers' },
               ],
-              default: 'unknown'
-            }
+              default: 'unknown',
+            },
           },
           totalUsers: { $sum: 1 },
-          activeUsers: { $sum: { $cond: ['$isRecentlyActive', 1, 0] } }
-        }
+          activeUsers: { $sum: { $cond: ['$isRecentlyActive', 1, 0] } },
+        },
       },
       {
         $project: {
           segment: '$_id',
           totalUsers: 1,
           activeUsers: 1,
-          retentionRate: { 
-            $round: [
-              { $multiply: [{ $divide: ['$activeUsers', '$totalUsers'] }, 100] }, 
-              2
-            ]
-          }
-        }
-      }
+          retentionRate: {
+            $round: [{ $multiply: [{ $divide: ['$activeUsers', '$totalUsers'] }, 100] }, 2],
+          },
+        },
+      },
     ]);
 
     res.json({
       retentionData,
       achievementRetention,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -265,7 +271,7 @@ router.get('/retention', async (req, res) => {
 router.get('/badge-gifting', async (req, res) => {
   try {
     const { period } = req.query;
-    
+
     const dateRange = new Date();
     switch (period) {
       case 'day':
@@ -284,18 +290,18 @@ router.get('/badge-gifting', async (req, res) => {
     // Gift volume and trends
     const giftingTrends = await BadgeGift.aggregate([
       {
-        $match: { sentAt: { $gte: dateRange } }
+        $match: { sentAt: { $gte: dateRange } },
       },
       {
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$sentAt" }
+            $dateToString: { format: '%Y-%m-%d', date: '$sentAt' },
           },
           giftsCount: { $sum: 1 },
           totalPointsSpent: { $sum: '$pointsCost' },
           uniqueGifters: { $addToSet: '$fromUserId' },
-          uniqueReceivers: { $addToSet: '$toUserId' }
-        }
+          uniqueReceivers: { $addToSet: '$toUserId' },
+        },
       },
       {
         $project: {
@@ -303,60 +309,60 @@ router.get('/badge-gifting', async (req, res) => {
           giftsCount: 1,
           totalPointsSpent: 1,
           uniqueGiftersCount: { $size: '$uniqueGifters' },
-          uniqueReceiversCount: { $size: '$uniqueReceivers' }
-        }
+          uniqueReceiversCount: { $size: '$uniqueReceivers' },
+        },
       },
       {
-        $sort: { date: 1 }
-      }
+        $sort: { date: 1 },
+      },
     ]);
 
     // Top gifted badges
     const popularBadges = await BadgeGift.aggregate([
       {
-        $match: { sentAt: { $gte: dateRange } }
+        $match: { sentAt: { $gte: dateRange } },
       },
       {
         $group: {
           _id: '$badgeId',
           giftCount: { $sum: 1 },
-          totalPointsSpent: { $sum: '$pointsCost' }
-        }
+          totalPointsSpent: { $sum: '$pointsCost' },
+        },
       },
       {
         $lookup: {
           from: 'badges',
           localField: '_id',
           foreignField: '_id',
-          as: 'badge'
-        }
+          as: 'badge',
+        },
       },
       {
-        $unwind: '$badge'
+        $unwind: '$badge',
       },
       {
-        $sort: { giftCount: -1 }
+        $sort: { giftCount: -1 },
       },
       {
-        $limit: 10
-      }
+        $limit: 10,
+      },
     ]);
 
     // Gifting occasions
     const occasionStats = await BadgeGift.aggregate([
       {
-        $match: { sentAt: { $gte: dateRange } }
+        $match: { sentAt: { $gte: dateRange } },
       },
       {
         $group: {
           _id: '$metadata.occasion',
           count: { $sum: 1 },
-          averagePointCost: { $avg: '$pointsCost' }
-        }
+          averagePointCost: { $avg: '$pointsCost' },
+        },
       },
       {
-        $sort: { count: -1 }
-      }
+        $sort: { count: -1 },
+      },
     ]);
 
     // Community impact
@@ -374,9 +380,9 @@ router.get('/badge-gifting', async (req, res) => {
         giftingUsers: giftingUsers.length,
         receivingUsers: receivingUsers.length,
         giftingParticipation: Math.round((giftingUsers.length / totalUsers) * 100),
-        receivingParticipation: Math.round((receivingUsers.length / totalUsers) * 100)
+        receivingParticipation: Math.round((receivingUsers.length / totalUsers) * 100),
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -397,15 +403,15 @@ router.get('/streaks', async (req, res) => {
                 { case: { $lte: ['$currentStreak', 7] }, then: '1-7_days' },
                 { case: { $lte: ['$currentStreak', 30] }, then: '8-30_days' },
                 { case: { $lte: ['$currentStreak', 100] }, then: '31-100_days' },
-                { case: { $gt: ['$currentStreak', 100] }, then: '100+_days' }
+                { case: { $gt: ['$currentStreak', 100] }, then: '100+_days' },
               ],
-              default: 'unknown'
-            }
+              default: 'unknown',
+            },
           },
           count: { $sum: 1 },
-          averageStreak: { $avg: '$currentStreak' }
-        }
-      }
+          averageStreak: { $avg: '$currentStreak' },
+        },
+      },
     ]);
 
     // Streak milestone achievements
@@ -415,39 +421,39 @@ router.get('/streaks', async (req, res) => {
           _id: null,
           streak7Achievers: { $sum: { $cond: ['$achievements.streak7', 1, 0] } },
           streak30Achievers: { $sum: { $cond: ['$achievements.streak30', 1, 0] } },
-          streak100Achievers: { $sum: { $cond: ['$achievements.streak100', 1, 0] } }
-        }
-      }
+          streak100Achievers: { $sum: { $cond: ['$achievements.streak100', 1, 0] } },
+        },
+      },
     ]);
 
     // Streak trends over time
     const streakTrends = await StreakTracker.aggregate([
       {
-        $unwind: '$streakHistory'
+        $unwind: '$streakHistory',
       },
       {
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$streakHistory.date" }
+            $dateToString: { format: '%Y-%m-%d', date: '$streakHistory.date' },
           },
           activeStreakUsers: { $sum: 1 },
           averageStreakDay: { $avg: '$streakHistory.streakDay' },
-          totalPosts: { $sum: '$streakHistory.postsCount' }
-        }
+          totalPosts: { $sum: '$streakHistory.postsCount' },
+        },
       },
       {
-        $sort: { _id: -1 }
+        $sort: { _id: -1 },
       },
       {
-        $limit: 30
-      }
+        $limit: 30,
+      },
     ]);
 
     res.json({
       streakDistribution,
       milestoneAchievements: milestoneAchievements[0] || {},
       streakTrends,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -458,7 +464,7 @@ router.get('/streaks', async (req, res) => {
 router.get('/dashboard', async (req, res) => {
   try {
     const { period } = req.query;
-    
+
     const dateRange = new Date();
     switch (period) {
       case 'day':
@@ -482,18 +488,18 @@ router.get('/dashboard', async (req, res) => {
       achievementsUnlocked,
       totalBadgeGifts,
       activeStreaks,
-      totalPosts
+      totalPosts,
     ] = await Promise.all([
       User.countDocuments({}),
       User.countDocuments({ lastActive: { $gte: dateRange } }),
       Achievement.countDocuments({ isActive: true }),
-      UserAchievement.countDocuments({ 
+      UserAchievement.countDocuments({
         completedAt: { $gte: dateRange },
-        isCompleted: true 
+        isCompleted: true,
       }),
       BadgeGift.countDocuments({ sentAt: { $gte: dateRange } }),
       StreakTracker.countDocuments({ currentStreak: { $gt: 0 } }),
-      Post.countDocuments({ createdAt: { $gte: dateRange } })
+      Post.countDocuments({ createdAt: { $gte: dateRange } }),
     ]);
 
     // Engagement metrics
@@ -501,7 +507,7 @@ router.get('/dashboard', async (req, res) => {
       userRetention: Math.round((activeUsers / totalUsers) * 100),
       achievementEngagement: Math.round((achievementsUnlocked / totalAchievements) * 100),
       communityEngagement: Math.round((totalBadgeGifts / activeUsers) * 100),
-      streakParticipation: Math.round((activeStreaks / totalUsers) * 100)
+      streakParticipation: Math.round((activeStreaks / totalUsers) * 100),
     };
 
     // Growth trends
@@ -509,17 +515,17 @@ router.get('/dashboard', async (req, res) => {
       {
         $group: {
           _id: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
           },
-          newUsers: { $sum: 1 }
-        }
+          newUsers: { $sum: 1 },
+        },
       },
       {
-        $sort: { _id: -1 }
+        $sort: { _id: -1 },
       },
       {
-        $limit: 30
-      }
+        $limit: 30,
+      },
     ]);
 
     res.json({
@@ -531,11 +537,11 @@ router.get('/dashboard', async (req, res) => {
         achievementsUnlocked,
         totalBadgeGifts,
         activeStreaks,
-        totalPosts
+        totalPosts,
       },
       engagementMetrics,
       userGrowth,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });

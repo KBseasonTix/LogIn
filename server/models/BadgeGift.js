@@ -5,58 +5,58 @@ const badgeGiftSchema = new mongoose.Schema({
   fromUserId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   toUserId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   badgeId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Badge',
-    required: true
+    required: true,
   },
   message: {
     type: String,
     maxlength: 200,
-    required: true
+    required: true,
   },
   pointsCost: {
     type: Number,
     required: true,
     min: 30,
-    max: 70
+    max: 70,
   },
   status: {
     type: String,
     enum: ['sent', 'received', 'declined'],
-    default: 'sent'
+    default: 'sent',
   },
   transactionId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Transaction',
-    required: true
+    required: true,
   },
   sentAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   receivedAt: {
     type: Date,
-    default: null
+    default: null,
   },
   metadata: {
     occasion: {
       type: String,
       enum: ['congratulations', 'encouragement', 'thank_you', 'milestone', 'other'],
-      default: 'other'
+      default: 'other',
     },
     isAnonymous: {
       type: Boolean,
-      default: false
-    }
-  }
+      default: false,
+    },
+  },
 });
 
 // Indexes for efficient querying
