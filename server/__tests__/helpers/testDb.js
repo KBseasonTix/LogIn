@@ -1,24 +1,42 @@
-// Test Database Helper - In-Memory MongoDB
+// Test Database Helper - In-Memory MongoDB or CI MongoDB
 
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongoServer;
 
+// Detect if we're running in CI environment
+const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+
 /**
- * Connect to in-memory database
+ * Connect to database (in-memory or CI MongoDB)
  */
 const connect = async () => {
   // Close any existing connections
   await disconnect();
 
-  // Create new in-memory database with specific MongoDB version
-  mongoServer = await MongoMemoryServer.create({
-    binary: {
-      version: '6.0.9', // Use a stable, known version
-    },
-  });
-  const mongoUri = mongoServer.getUri();
+  let mongoUri;
+
+  if (isCI) {
+    // In CI: Use the MongoDB service provided by GitHub Actions
+    mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/fitness-tracker-test';
+    console.log('Using CI MongoDB service:', mongoUri);
+  } else {
+    // Local: Try to use MongoMemoryServer, fall back to local MongoDB
+    try {
+      mongoServer = await MongoMemoryServer.create({
+        binary: {
+          version: '6.0.9',
+        },
+      });
+      mongoUri = mongoServer.getUri();
+      console.log('Using MongoDB Memory Server');
+    } catch (error) {
+      // If MongoMemoryServer fails (network issues), use local MongoDB
+      console.warn('MongoMemoryServer failed, using local MongoDB:', error.message);
+      mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/test-db';
+    }
+  }
 
   await mongoose.connect(mongoUri, {
     useNewUrlParser: true,
@@ -31,10 +49,14 @@ const connect = async () => {
  */
 const disconnect = async () => {
   if (mongoose.connection.readyState !== 0) {
-    await mongoose.connection.dropDatabase();
+    // Only drop database if not in CI (to avoid conflicts with parallel tests)
+    if (!isCI) {
+      await mongoose.connection.dropDatabase();
+    }
     await mongoose.connection.close();
   }
 
+  // Stop MongoMemoryServer if it was used
   if (mongoServer) {
     await mongoServer.stop();
     mongoServer = null;
