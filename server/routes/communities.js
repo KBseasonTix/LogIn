@@ -12,9 +12,33 @@ const { withTransaction } = require('../utils/transactions');
 const router = express.Router();
 
 /**
- * @route   GET /api/communities
- * @desc    Get all communities
- * @access  Private
+ * @swagger
+ * /api/communities:
+ *   get:
+ *     summary: Get all communities
+ *     tags: [Communities]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all communities
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 count:
+ *                   type: integer
+ *                   example: 10
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Community'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
  */
 router.get(
   '/',

@@ -7,9 +7,31 @@ const logger = require('../config/logger');
 const router = express.Router();
 
 /**
- * @route   GET /health
- * @desc    Basic health check - lightweight, fast
- * @access  Public
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Basic health check
+ *     description: Lightweight health check endpoint for load balancers and monitoring
+ *     tags: [Health]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Service is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: healthy
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *                 uptime:
+ *                   type: number
+ *                   description: Process uptime in seconds
+ *                   example: 12345.67
  */
 router.get('/', (req, res) => {
   res.status(200).json({

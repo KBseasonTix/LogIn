@@ -135,6 +135,10 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 // Apply rate limiting to all API routes
 app.use('/api', apiLimiter);
 
+// API Documentation (Swagger)
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+
 // Routes
 const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
@@ -148,8 +152,12 @@ const badgeGiftRoutes = require('./routes/badgeGifts');
 const notificationRoutes = require('./routes/notifications');
 const analyticsRoutes = require('./routes/analytics');
 
-// Mount routes (health check first, no rate limiting)
+// Mount routes (health check and docs first, no rate limiting)
 app.use('/health', healthRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Fitness Tracker API Docs'
+}));
 app.use('/api/auth', authRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/posts', postRoutes);

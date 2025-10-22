@@ -1,0 +1,44 @@
+{
+  "env": {
+    "node": true,
+    "es2021": true,
+    "jest": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:node/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "commonjs"
+  },
+  "rules": {
+    "no-console": ["warn", { "allow": ["error", "warn"] }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "prefer-const": "error",
+    "no-var": "error",
+    "eqeqeq": ["error", "always"],
+    "curly": ["error", "all"],
+    "no-throw-literal": "error",
+    "prefer-promise-reject-errors": "error",
+    "no-return-await": "error",
+    "require-await": "warn",
+    "node/no-unsupported-features/es-syntax": "off",
+    "node/no-missing-require": "error",
+    "node/no-unpublished-require": "off",
+    "node/no-extraneous-require": "error",
+    "prettier/prettier": ["error", {}, { "usePrettierrc": true }]
+  },
+  "overrides": [
+    {
+      "files": ["__tests__/**/*.js"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "node/no-unpublished-require": "off"
+      }
+    }
+  ]
+}
