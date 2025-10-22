@@ -17,14 +17,16 @@ if (process.env.RAILWAY_ENVIRONMENT) {
   dotenv.config();
 }
 
-// Validate critical environment variables
-const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET', 'STRIPE_SECRET_KEY'];
-const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+// Validate critical environment variables (skip in test mode)
+if (process.env.NODE_ENV !== 'test') {
+  const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET', 'STRIPE_SECRET_KEY'];
+  const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
-if (missingEnvVars.length > 0) {
-  console.error('❌ Missing required environment variables:', missingEnvVars.join(', '));
-  console.error('Please set these variables in your environment or .env file');
-  process.exit(1);
+  if (missingEnvVars.length > 0) {
+    console.error('❌ Missing required environment variables:', missingEnvVars.join(', '));
+    console.error('Please set these variables in your environment or .env file');
+    process.exit(1);
+  }
 }
 
 // Debug environment variables (without exposing values)
@@ -54,25 +56,27 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
-// MongoDB Connection
-if (!process.env.MONGODB_URI) {
-  console.error('❌ MONGODB_URI environment variable is not set!');
-  console.error('Please set MONGODB_URI in Railway dashboard environment variables.');
-  process.exit(1);
-}
+// MongoDB Connection (skip in test mode - tests use their own in-memory DB)
+if (process.env.NODE_ENV !== 'test') {
+  if (!process.env.MONGODB_URI) {
+    console.error('❌ MONGODB_URI environment variable is not set!');
+    console.error('Please set MONGODB_URI in Railway dashboard environment variables.');
+    process.exit(1);
+  }
 
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('✅ MongoDB connected successfully');
-  console.log('Database:', process.env.MONGODB_URI.split('/')[3]?.split('?')[0]);
-})
-.catch(err => {
-  console.error('❌ MongoDB connection failed:', err.message);
-  process.exit(1);
-});
+  mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('✅ MongoDB connected successfully');
+    console.log('Database:', process.env.MONGODB_URI.split('/')[3]?.split('?')[0]);
+  })
+  .catch(err => {
+    console.error('❌ MongoDB connection failed:', err.message);
+    process.exit(1);
+  });
+}
 
 // Models
 const User = require('./models/User');
@@ -94,21 +98,23 @@ const CacheService = require('./services/CacheService');
 const BackgroundJobs = require('./jobs/BackgroundJobs');
 const seedAchievements = require('./data/seedAchievements');
 
-// Initialize achievement system after DB connection
-mongoose.connection.once('open', async () => {
-  console.log('Initializing achievement system...');
-  
-  // Seed default achievements
-  await seedAchievements();
-  
-  // Load achievements into engine
-  await AchievementEngine.loadAchievements();
-  
-  // Start background jobs
-  BackgroundJobs.start();
-  
-  console.log('Achievement system initialized');
-});
+// Initialize achievement system after DB connection (skip in test mode)
+if (process.env.NODE_ENV !== 'test') {
+  mongoose.connection.once('open', async () => {
+    console.log('Initializing achievement system...');
+
+    // Seed default achievements
+    await seedAchievements();
+
+    // Load achievements into engine
+    await AchievementEngine.loadAchievements();
+
+    // Start background jobs
+    BackgroundJobs.start();
+
+    console.log('Achievement system initialized');
+  });
+}
 
 // Import middleware
 const { apiLimiter } = require('./middleware/rateLimiter');
@@ -201,22 +207,24 @@ app.use(notFound);
 // Global error handler - must be last
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// Start server (skip in test mode)
+if (process.env.NODE_ENV !== 'test') {
+  const server = app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM signal received: closing HTTP server');
-  server.close(() => {
-    console.log('HTTP server closed');
-    mongoose.connection.close(false, () => {
-      console.log('MongoDB connection closed');
-      process.exit(0);
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+      console.log('HTTP server closed');
+      mongoose.connection.close(false, () => {
+        console.log('MongoDB connection closed');
+        process.exit(0);
+      });
     });
   });
-});
+}
 
 module.exports = app;
