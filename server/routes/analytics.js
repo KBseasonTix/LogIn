@@ -6,7 +6,7 @@ const Achievement = require('../models/Achievement');
 const UserAchievement = require('../models/UserAchievement');
 const BadgeGift = require('../models/BadgeGift');
 const StreakTracker = require('../models/StreakTracker');
-const Transaction = require('../models/Transaction');
+const _Transaction = require('../models/Transaction');
 const Post = require('../models/Post');
 
 // Get achievement engagement analytics
@@ -14,7 +14,7 @@ router.get('/achievements/engagement', async (req, res) => {
   try {
     const { period } = req.query; // 'day', 'week', 'month', 'year'
     
-    let dateRange = new Date();
+    const dateRange = new Date();
     switch (period) {
       case 'day':
         dateRange.setDate(dateRange.getDate() - 1);
@@ -148,8 +148,8 @@ router.get('/achievements/engagement', async (req, res) => {
 // Get user retention analytics
 router.get('/retention', async (req, res) => {
   try {
-    const { cohortPeriod } = req.query; // 'day', 'week', 'month'
-    
+    const { cohortPeriod: _cohortPeriod } = req.query; // 'day', 'week', 'month'
+
     // Calculate retention based on achievement activity
     const retentionData = await UserAchievement.aggregate([
       {
@@ -266,7 +266,7 @@ router.get('/badge-gifting', async (req, res) => {
   try {
     const { period } = req.query;
     
-    let dateRange = new Date();
+    const dateRange = new Date();
     switch (period) {
       case 'day':
         dateRange.setDate(dateRange.getDate() - 1);
@@ -459,7 +459,7 @@ router.get('/dashboard', async (req, res) => {
   try {
     const { period } = req.query;
     
-    let dateRange = new Date();
+    const dateRange = new Date();
     switch (period) {
       case 'day':
         dateRange.setDate(dateRange.getDate() - 1);

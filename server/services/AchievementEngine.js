@@ -113,9 +113,10 @@ class AchievementEngine {
       case 'posts_count':
         return user.totalPosts || 0;
 
-      case 'streak_days':
+      case 'streak_days': {
         const streakTracker = await StreakTracker.findOne({ userId: user._id });
         return streakTracker ? streakTracker.currentStreak : 0;
+      }
 
       case 'reactions_received':
         return user.totalReactionsReceived || 0;

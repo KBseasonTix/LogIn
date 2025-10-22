@@ -129,7 +129,7 @@ class NotificationService {
 
   async createStreakMilestoneNotification(userId, streakDays) {
     try {
-      let title = 'Streak Milestone!';
+      const title = 'Streak Milestone!';
       let message = `Congratulations! You've reached a ${streakDays}-day posting streak!`;
 
       if (streakDays === 7) {

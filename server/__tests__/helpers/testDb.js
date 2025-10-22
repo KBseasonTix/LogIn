@@ -57,7 +57,7 @@ const clearDatabase = async () => {
  * Seed database with test data
  */
 const seedDatabase = async () => {
-  const User = require('../../models/User');
+  const _User = require('../../models/User');
   const Community = require('../../models/Community');
   const Badge = require('../../models/Badge');
   const Achievement = require('../../models/Achievement');

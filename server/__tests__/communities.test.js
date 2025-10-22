@@ -86,7 +86,7 @@ describe('GET /api/communities/:id', () => {
   it('should reject invalid community ID format', async () => {
     const { token } = await createAuthenticatedUser();
 
-    const response = await request(app)
+    await request(app)
       .get('/api/communities/invalid-id')
       .set('Authorization', `Bearer ${token}`)
       .expect(400);

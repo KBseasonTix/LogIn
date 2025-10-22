@@ -44,7 +44,7 @@ router.get('/user/:userId', async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    let query = { userId };
+    const query = { userId };
     if (completed !== undefined) {
       query.isCompleted = completed === 'true';
     }

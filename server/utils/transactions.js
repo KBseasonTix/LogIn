@@ -13,7 +13,7 @@ const withTransaction = async (operation) => {
   // Skip transactions in test mode or if not using replica set
   if (process.env.NODE_ENV === 'test' || !mongoose.connection.db) {
     // Execute without transaction
-    return await operation(null);
+    return operation(null);
   }
 
   const session = await mongoose.startSession();

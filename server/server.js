@@ -86,23 +86,23 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
-// Models
+// Models (prefixed with _ as they're loaded for Mongoose registration)
 const User = require('./models/User');
-const Community = require('./models/Community');
+const _Community = require('./models/Community');
 const Post = require('./models/Post');
-const Badge = require('./models/Badge');
+const _Badge = require('./models/Badge');
 const Transaction = require('./models/Transaction');
-const Achievement = require('./models/Achievement');
-const UserAchievement = require('./models/UserAchievement');
-const StreakTracker = require('./models/StreakTracker');
-const BadgeGift = require('./models/BadgeGift');
-const Notification = require('./models/Notification');
+const _Achievement = require('./models/Achievement');
+const _UserAchievement = require('./models/UserAchievement');
+const _StreakTracker = require('./models/StreakTracker');
+const _BadgeGift = require('./models/BadgeGift');
+const _Notification = require('./models/Notification');
 
-// Services
+// Services (prefixed with _ as they may be used in future or for side effects)
 const AchievementEngine = require('./services/AchievementEngine');
-const StreakService = require('./services/StreakService');
-const NotificationService = require('./services/NotificationService');
-const CacheService = require('./services/CacheService');
+const _StreakService = require('./services/StreakService');
+const _NotificationService = require('./services/NotificationService');
+const _CacheService = require('./services/CacheService');
 const BackgroundJobs = require('./jobs/BackgroundJobs');
 const seedAchievements = require('./data/seedAchievements');
 
