@@ -10,6 +10,7 @@ const { postLimiter } = require('../middleware/rateLimiter');
 const AchievementEngine = require('../services/AchievementEngine');
 const StreakService = require('../services/StreakService');
 const { POINTS, MARKER_TYPES } = require('../config/constants');
+const { withTransaction } = require('../utils/transactions');
 
 const router = express.Router();
 
@@ -154,34 +155,38 @@ router.post(
     // Award points for positive reactions (not on own post)
     if (type === MARKER_TYPES.POSITIVE && post.userId.toString() !== userId) {
       try {
-        const [postOwner, reactor] = await Promise.all([
-          User.findById(post.userId),
-          User.findById(userId)
-        ]);
-
-        if (postOwner && reactor) {
-          // Award points to post owner
-          postOwner.points += POINTS.POSITIVE_REACTION;
-          postOwner.totalReactionsReceived = (postOwner.totalReactionsReceived || 0) + 1;
-
-          // Update reactor stats
-          reactor.totalReactionsGiven = (reactor.totalReactionsGiven || 0) + 1;
-
-          await Promise.all([
-            postOwner.save(),
-            reactor.save()
+        // Use transaction to ensure atomicity of multi-user update
+        await withTransaction(async (session) => {
+          const [postOwner, reactor] = await Promise.all([
+            User.findById(post.userId).session(session),
+            User.findById(userId).session(session)
           ]);
 
-          // Trigger achievements for both users
-          await Promise.all([
-            AchievementEngine.checkAndAwardAchievements(postOwner._id, 'reaction_received', {
-              totalReactionsReceived: postOwner.totalReactionsReceived
-            }),
-            AchievementEngine.checkAndAwardAchievements(reactor._id, 'reaction_given', {
-              totalReactionsGiven: reactor.totalReactionsGiven
-            })
-          ]);
-        }
+          if (postOwner && reactor) {
+            // Award points to post owner
+            postOwner.points += POINTS.POSITIVE_REACTION;
+            postOwner.totalReactionsReceived = (postOwner.totalReactionsReceived || 0) + 1;
+
+            // Update reactor stats
+            reactor.totalReactionsGiven = (reactor.totalReactionsGiven || 0) + 1;
+
+            // Save both users atomically
+            await postOwner.save({ session });
+            await reactor.save({ session });
+
+            // Trigger achievements for both users (outside transaction to avoid blocking)
+            setImmediate(() => {
+              Promise.all([
+                AchievementEngine.checkAndAwardAchievements(postOwner._id, 'reaction_received', {
+                  totalReactionsReceived: postOwner.totalReactionsReceived
+                }),
+                AchievementEngine.checkAndAwardAchievements(reactor._id, 'reaction_given', {
+                  totalReactionsGiven: reactor.totalReactionsGiven
+                })
+              ]).catch(err => console.error('Achievement update failed:', err.message));
+            });
+          }
+        });
       } catch (error) {
         console.error('Error awarding points for reaction:', error.message);
         // Don't fail the marker update if points/achievements fail

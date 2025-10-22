@@ -7,6 +7,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { validateBody } = require('../middleware/validation');
 const { catchAsync, AppError } = require('../middleware/errorHandler');
 const { LIMITS } = require('../config/constants');
+const { withTransaction } = require('../utils/transactions');
 
 const router = express.Router();
 
@@ -102,16 +103,16 @@ router.post(
       });
     }
 
-    // Add user to community and community to user
-    user.joinedCommunities.push(communityId);
-    if (!community.members.includes(userId)) {
-      community.members.push(userId);
-    }
+    // Add user to community and community to user (atomically)
+    await withTransaction(async (session) => {
+      user.joinedCommunities.push(communityId);
+      if (!community.members.includes(userId)) {
+        community.members.push(userId);
+      }
 
-    await Promise.all([
-      user.save(),
-      community.save()
-    ]);
+      await user.save({ session });
+      await community.save({ session });
+    });
 
     res.json({
       success: true,
@@ -159,18 +160,18 @@ router.post(
       });
     }
 
-    // Remove user from community and community from user
-    user.joinedCommunities = user.joinedCommunities.filter(
-      id => id.toString() !== communityId
-    );
-    community.members = community.members.filter(
-      id => id.toString() !== userId
-    );
+    // Remove user from community and community from user (atomically)
+    await withTransaction(async (session) => {
+      user.joinedCommunities = user.joinedCommunities.filter(
+        id => id.toString() !== communityId
+      );
+      community.members = community.members.filter(
+        id => id.toString() !== userId
+      );
 
-    await Promise.all([
-      user.save(),
-      community.save()
-    ]);
+      await user.save({ session });
+      await community.save({ session });
+    });
 
     res.json({
       success: true,

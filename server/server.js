@@ -10,12 +10,14 @@ const dotenv = require('dotenv');
 // Load environment variables
 if (process.env.RAILWAY_ENVIRONMENT) {
   // Railway automatically injects environment variables
-  console.log('Running on Railway - using injected environment variables');
 } else if (process.env.NODE_ENV === 'production') {
   dotenv.config({ path: '.env.production' });
 } else {
   dotenv.config();
 }
+
+// Initialize logger early
+const logger = require('./config/logger');
 
 // Validate critical environment variables (skip in test mode)
 if (process.env.NODE_ENV !== 'test') {
@@ -23,22 +25,29 @@ if (process.env.NODE_ENV !== 'test') {
   const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
   if (missingEnvVars.length > 0) {
-    console.error('❌ Missing required environment variables:', missingEnvVars.join(', '));
-    console.error('Please set these variables in your environment or .env file');
+    logger.error('Missing required environment variables:', { variables: missingEnvVars });
     process.exit(1);
   }
 }
 
-// Debug environment variables (without exposing values)
-console.log('Environment check:');
-console.log('NODE_ENV:', process.env.NODE_ENV || 'development');
-console.log('RAILWAY_ENVIRONMENT:', process.env.RAILWAY_ENVIRONMENT ? 'YES' : 'NO');
-console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'SET ✓' : 'UNDEFINED ✗');
-console.log('JWT_SECRET:', process.env.JWT_SECRET ? 'SET ✓' : 'UNDEFINED ✗');
-console.log('PORT:', process.env.PORT || 3000);
+// Log environment info
+logger.info('Starting application', {
+  environment: process.env.NODE_ENV || 'development',
+  railway: process.env.RAILWAY_ENVIRONMENT ? 'yes' : 'no',
+  port: process.env.PORT || 3000,
+  nodeVersion: process.version,
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Request tracking middleware (must be first)
+const { requestId } = require('./middleware/requestId');
+app.use(requestId);
+
+// Request logging middleware (after request ID)
+const { requestLogger } = require('./middleware/logging');
+app.use(requestLogger);
 
 // Security Middleware
 app.use(helmet()); // Set security HTTP headers
@@ -59,8 +68,7 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 // MongoDB Connection (skip in test mode - tests use their own in-memory DB)
 if (process.env.NODE_ENV !== 'test') {
   if (!process.env.MONGODB_URI) {
-    console.error('❌ MONGODB_URI environment variable is not set!');
-    console.error('Please set MONGODB_URI in Railway dashboard environment variables.');
+    logger.error('MONGODB_URI environment variable is not set');
     process.exit(1);
   }
 
@@ -69,11 +77,11 @@ if (process.env.NODE_ENV !== 'test') {
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log('✅ MongoDB connected successfully');
-    console.log('Database:', process.env.MONGODB_URI.split('/')[3]?.split('?')[0]);
+    const dbName = process.env.MONGODB_URI.split('/')[3]?.split('?')[0];
+    logger.info('MongoDB connected successfully', { database: dbName });
   })
   .catch(err => {
-    console.error('❌ MongoDB connection failed:', err.message);
+    logger.error('MongoDB connection failed', { error: err.message });
     process.exit(1);
   });
 }
@@ -101,18 +109,22 @@ const seedAchievements = require('./data/seedAchievements');
 // Initialize achievement system after DB connection (skip in test mode)
 if (process.env.NODE_ENV !== 'test') {
   mongoose.connection.once('open', async () => {
-    console.log('Initializing achievement system...');
+    try {
+      logger.info('Initializing achievement system');
 
-    // Seed default achievements
-    await seedAchievements();
+      // Seed default achievements
+      await seedAchievements();
 
-    // Load achievements into engine
-    await AchievementEngine.loadAchievements();
+      // Load achievements into engine
+      await AchievementEngine.loadAchievements();
 
-    // Start background jobs
-    BackgroundJobs.start();
+      // Start background jobs
+      BackgroundJobs.start();
 
-    console.log('Achievement system initialized');
+      logger.info('Achievement system initialized successfully');
+    } catch (error) {
+      logger.error('Failed to initialize achievement system', { error: error.message });
+    }
   });
 }
 
@@ -124,6 +136,7 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 app.use('/api', apiLimiter);
 
 // Routes
+const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
 const communityRoutes = require('./routes/communities');
 const postRoutes = require('./routes/posts');
@@ -135,7 +148,8 @@ const badgeGiftRoutes = require('./routes/badgeGifts');
 const notificationRoutes = require('./routes/notifications');
 const analyticsRoutes = require('./routes/analytics');
 
-// Mount routes
+// Mount routes (health check first, no rate limiting)
+app.use('/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/communities', communityRoutes);
 app.use('/api/posts', postRoutes);
@@ -146,15 +160,6 @@ app.use('/api/streaks', streakRoutes);
 app.use('/api/badge-gifts', badgeGiftRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/analytics', analyticsRoutes);
-
-// Health check route
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  });
-});
 
 // Daily cron job for resetting daily counters
 const cron = require('node-cron');
@@ -195,9 +200,9 @@ cron.schedule('0 0 * * *', async () => {
       await user.save();
     }
 
-    console.log('Daily reset completed');
+    logger.info('Daily reset completed');
   } catch (error) {
-    console.error('Daily reset failed:', error);
+    logger.error('Daily reset failed', { error: error.message, stack: error.stack });
   }
 });
 
@@ -210,17 +215,20 @@ app.use(errorHandler);
 // Start server (skip in test mode)
 if (process.env.NODE_ENV !== 'test') {
   const server = app.listen(PORT, () => {
-    console.log(`✅ Server running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info('Server started successfully', {
+      port: PORT,
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString()
+    });
   });
 
   // Graceful shutdown
   process.on('SIGTERM', () => {
-    console.log('SIGTERM signal received: closing HTTP server');
+    logger.info('SIGTERM signal received: initiating graceful shutdown');
     server.close(() => {
-      console.log('HTTP server closed');
+      logger.info('HTTP server closed');
       mongoose.connection.close(false, () => {
-        console.log('MongoDB connection closed');
+        logger.info('MongoDB connection closed');
         process.exit(0);
       });
     });
