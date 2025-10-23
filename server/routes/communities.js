@@ -81,9 +81,49 @@ router.get(
 );
 
 /**
- * @route   POST /api/communities/join
- * @desc    Join a community
- * @access  Private
+ * @swagger
+ * /api/communities/join:
+ *   post:
+ *     summary: Join a community
+ *     description: Allows users to join communities. Free users limited to 2 communities, premium users unlimited.
+ *     tags: [Communities]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - communityId
+ *             properties:
+ *               communityId:
+ *                 type: string
+ *                 example: 507f1f77bcf86cd799439011
+ *     responses:
+ *       200:
+ *         description: Successfully joined community
+ *       400:
+ *         description: Already a member
+ *       403:
+ *         description: Free user limit reached (upgrade required)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Free users can only join 2 communities
+ *                 upgradeRequired:
+ *                   type: boolean
+ *                   example: true
+ *       404:
+ *         description: Community not found
  */
 router.post(
   '/join',

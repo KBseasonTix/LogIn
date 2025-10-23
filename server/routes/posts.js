@@ -15,9 +15,44 @@ const { withTransaction } = require('../utils/transactions');
 const router = express.Router();
 
 /**
- * @route   GET /api/posts
- * @desc    Get posts (optionally filtered by community)
- * @access  Private
+ * @swagger
+ * /api/posts:
+ *   get:
+ *     summary: Get posts with optional filters
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: communityId
+ *         schema:
+ *           type: string
+ *         description: Filter by community ID
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         description: Filter by user ID
+ *     responses:
+ *       200:
+ *         description: List of posts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 count:
+ *                   type: integer
+ *                   example: 25
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Post'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
  */
 router.get(
   '/',
@@ -50,9 +85,56 @@ router.get(
 );
 
 /**
- * @route   POST /api/posts
- * @desc    Create a new post
- * @access  Private
+ * @swagger
+ * /api/posts:
+ *   post:
+ *     summary: Create a new post in a community
+ *     tags: [Posts]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - communityId
+ *               - content
+ *             properties:
+ *               communityId:
+ *                 type: string
+ *                 example: 507f1f77bcf86cd799439011
+ *               content:
+ *                 type: string
+ *                 maxLength: 500
+ *                 example: Just completed my morning run!
+ *               picture:
+ *                 type: string
+ *                 description: URL to post image
+ *               timezone:
+ *                 type: string
+ *                 example: America/New_York
+ *     responses:
+ *       201:
+ *         description: Post created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Post'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       403:
+ *         description: Not a member of community
+ *       429:
+ *         description: Too many posts (rate limit exceeded)
  */
 router.post(
   '/',
